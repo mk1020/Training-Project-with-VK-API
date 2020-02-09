@@ -1,6 +1,8 @@
-export const RENDER_LIST_FRIENDS = "RENDER_LIST_FRIENDS"; 
+ // todo: rename
 
-export const renderListFriends = (massFriends) => ({
- type: RENDER_LIST_FRIENDS,
- massFriends: massFriends
+export const LIST_FRIENDS = "LIST_FRIENDS"; 
+
+export const listFriends = (arrayFriends) => ({
+ type: LIST_FRIENDS,
+ arrayFriends: arrayFriends
 })

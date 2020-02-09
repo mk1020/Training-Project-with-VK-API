@@ -8,15 +8,15 @@ const Friend = (props) => {
   return <button className={styles.button_friend}>Test </button>;
 };
 const App = props => {
-  const {vkReducer, getFriends, getFriendsThunk} = props;
-  const mass = [1,3,4,'d','as'];
+  const {first_last_name, getFriends, getFriendsThunk} = props;
+  console.log(first_last_name)
   return (
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
       <div className={styles.App}>
         <div className={styles.block_friends}>
           
-          <button onClick={props.getFriendsThunk} >ss</button>
+          <button onClick={getFriendsThunk} >ss</button>
           <Friend />
         </div>
       </div>
@@ -24,6 +24,6 @@ const App = props => {
   );
 };
 
-export default connect(state => ({ vkReducer: state.vkReducer }), {
+export default connect(state => ({ first_last_name: state.vkReducer }), {
   getFriendsThunk
 })(App);
