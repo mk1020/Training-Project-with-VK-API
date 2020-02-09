@@ -1,26 +1,29 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import styles from "./App.module.css";
+import { getFriendsThunk } from "./redux/thunks/thunks";
+import { connect } from "react-redux";
+import store from "./redux/Store";
 
-function App() {
+const Friend = (props) => {
+  return <button className={styles.button_friend}>Test </button>;
+};
+const App = props => {
+  const {vkReducer, getFriends, getFriendsThunk} = props;
+  const mass = [1,3,4,'d','as'];
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={styles.App_wrapper}>
+      <header className={styles.App_header}>VK API</header>
+      <div className={styles.App}>
+        <div className={styles.block_friends}>
+          
+          <button onClick={props.getFriendsThunk} >ss</button>
+          <Friend />
+        </div>
+      </div>
     </div>
   );
-}
+};
 
-export default App;
+export default connect(state => ({ vkReducer: state.vkReducer }), {
+  getFriendsThunk
+})(App);
