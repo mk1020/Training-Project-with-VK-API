@@ -9,7 +9,5 @@ export const getFriendsThunk = dispatch => {
       `https://api.vk.com/method/friends.get?v=5.8&fields=
        firsname&access_token=${api_token}`
     )
-    .then((response) => {
-         console.log(dispatch);
-    });
+    .then(response => dispatch(renderListFriends(response.data.response.count.items)));
 };
