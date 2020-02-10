@@ -1,8 +1,10 @@
 import { createStore, combineReducers, applyMiddleware } from "redux";
 import thunkMiddleware from "redux-thunk";
-import {vkReducer} from "./reducer";
+import {friendsReducer} from "./reducers/friendsReducer";
+import {photosReducer} from "./reducers/photosReducer";
 
-const reducers = combineReducers({vkReducer});
+
+const reducers = combineReducers({friendsReducer, photosReducer});
 
 const store = createStore(reducers, applyMiddleware(thunkMiddleware));
 
