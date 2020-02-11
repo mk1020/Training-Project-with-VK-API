@@ -13,7 +13,7 @@ const Friend = props => {
 const App = props => {
   const { name_surname, getFriendsThunk, searchFriendThunk, name_surname_liked, getPhotosThunk } = props;
   let [valueTextInput, setValueTextInput] = useState("");
-        console.log(name_surname_liked)
+  window.VK.Auth.login(null)
   return (
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
