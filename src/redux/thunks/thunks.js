@@ -1,10 +1,17 @@
 import * as axios from "axios";
-import { areaFriend, nameSurnameLikedPeople, allPhotos } from "../actions/actions";
+import {
+  areaFriend,
+  nameSurnameLikedPeople,
+  allPhotos
+} from "../actions/actions";
 // move to .env
 const api_token =
   "7b0cb4e7a555154329829579c4f2098c17641ade88bf6ce391f0c4236db9f05efddf0713a8bb64124a003";
 const baseURL = "https://api.vk.com/method/";
 const user_id = 43463557;
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export const getFriendsThunk = () => dispatch =>
   window.VK.api(
@@ -38,7 +45,7 @@ export const searchFriendThunk = search_line => dispatch =>
   }
 ); */
 
-export const getPhotosThunk = (user_id) => dispatch =>
+export const getPhotosThunk = user_id => dispatch =>
   window.VK.api(
     //получаем id фоток
     "photos.getAll",
@@ -48,43 +55,49 @@ export const getPhotosThunk = (user_id) => dispatch =>
       v: "5.103",
       access_token: api_token
     },
-    data => { 
+    data => {
       dispatch(allPhotos(data.response));
-      data.response.items.forEach(el => 
-        setTimeout(()=> {  window.VK.api(
-          // получаем массив id пользователей, которые лайкнули
-          "likes.getList",
-          {
-            type: "photo",
-            owner_id: user_id,
-            item_id: el.id,
-            count: 1000,
-            v: 5.103,
-            access_token: api_token
-          },
-          data => { console.log(data)
-            let IdLikedPeople = "";
-            data.response.items.forEach(el => {
-              // в ответе объект, в котором массив id людей, которые лайкнули
-              IdLikedPeople === "" //для ускорения, а может и не только, берём все id из массива
-                ? (IdLikedPeople = IdLikedPeople + el) //и кидаем их в строку через запятую, а потом делаем запрос
-                : (IdLikedPeople = IdLikedPeople + "," + el); //в который кинем эту строку idшников и он мнесто них вернет массив имен и фамилий
-            });
-            window.VK.api(
-              //массив имён и фамилий получившийся из списка id пользователей
-              "users.get",
-              { user_ids: IdLikedPeople, v: "5.103", access_token: api_token },
-              data => {
-                dispatch(nameSurnameLikedPeople(data.response, ));
-              }
-            );
-          }
-        );
-      },3000)
-      );
+      const forWithSleep = async () => {
+        for (const el of data.response.items) {
+          window.VK.api(
+            // получаем массив id пользователей, которые лайкнули
+            "likes.getList",
+            {
+              type: "photo",
+              owner_id: user_id,
+              item_id: el.id,
+              count: 1000,
+              v: 5.103,
+              access_token: api_token
+            },
+            data => {
+              let IdLikedPeople = "";
+              data.response.items.forEach(el => {
+                // в ответе объект, в котором массив id людей, которые лайкнули
+                IdLikedPeople === "" //для ускорения, а может и не только, берём все id из массива
+                  ? (IdLikedPeople = IdLikedPeople + el) //и кидаем их в строку через запятую, а потом делаем запрос
+                  : (IdLikedPeople = IdLikedPeople + "," + el); //в который кинем эту строку idшников и он мнесто них вернет массив имен и фамилий
+              });
+              window.VK.api(
+                //массив имён и фамилий получившийся из списка id пользователей
+                "users.get",
+                {
+                  user_ids: IdLikedPeople,
+                  v: "5.103",
+                  access_token: api_token
+                },
+                data => {
+                  dispatch(nameSurnameLikedPeople(data.response));
+                }
+              );
+            }
+          );
+          await sleep(1500);
+        }
+      };
+      forWithSleep()
     }
   );
-
 
 //   выбираю человека -->  появляется кнопка позволяющая показать(скрыть) все его фотографии-->
 //   выбираю фотографию и выбираю кнопку (показать всех кто лайкнул,только мужчин,

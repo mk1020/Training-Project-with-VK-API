@@ -6,7 +6,8 @@ export const inspectReducer = (state={}, action)=> {
            return action.arrayNameSurname
        }  */
        case types.ALL_PHOTOS: {
-            return {...state, count: action.count, items: action.items }
+            console.log(action)
+            return {...state, count: action.photos.count, items: action.photos.items }
        }
 
        default: return state;

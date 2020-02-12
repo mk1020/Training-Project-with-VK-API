@@ -9,7 +9,10 @@ import { connect } from "react-redux";
 
 const Friend = props => {
   return (
-    <button onClick={()=>props.onClick(props.friend.id)} className={styles.button_friend}>
+    <button
+      onClick={() => props.onClick(props.friend.id)}
+      className={styles.button_friend}
+    >
       {props.friend.first_name} {props.friend.last_name}
     </button>
   );
@@ -57,13 +60,20 @@ const App = props => {
           <div className={styles.block_friends}>
             <button onClick={getFriendsThunk}>All Friends</button>
             {friend.map((el, index) => (
-              <Friend  onClick={getPhotosThunk}  key={`fln_${index}`} friend={friend[index]} />
+              <Friend
+                onClick={getPhotosThunk}
+                key={`fln_${index}`}
+                friend={friend[index]}
+              />
             ))}
           </div>
         </div>
         <div className={styles.rightArea}>
           <button className={styles.button_count_photos}>
-            Фотографий:{/*  {count_photos} */}
+            Фотографий: {count_photos}
+          </button>
+          <button className={styles.button_show_photos}>
+            Показать 
           </button>
         </div>
       </div>
