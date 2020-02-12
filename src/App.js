@@ -9,18 +9,19 @@ import { connect } from "react-redux";
 
 const Friend = props => {
   return (
-    <button className={styles.button_friend}>
-      {props.name_surname.first_name} {props.name_surname.last_name}
+    <button onClick={()=>props.onClick(props.friend.id)} className={styles.button_friend}>
+      {props.friend.first_name} {props.friend.last_name}
     </button>
   );
 };
 const App = props => {
   const {
-    name_surname,
+    friend,
     getFriendsThunk,
     searchFriendThunk,
     name_surname_liked,
-    getPhotosThunk
+    getPhotosThunk,
+    count_photos
   } = props;
   let [valueTextInput, setValueTextInput] = useState("");
 
@@ -34,40 +35,36 @@ const App = props => {
     "5.103"
   );
 
-
-  window.VK.api(
-    "execute",
-    {
-      code: "return {user: API.users.get({user_ids: 48437298,  v: 5.73}), friends: API.friends.get()};"
-    },
-    function(data) {
-      console.log(data);
-    }
-  );
   return (
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
-      <div className={styles.App}>
-        <input
-          value={valueTextInput}
-          onChange={e => setValueTextInput(e.target.value)}
-          type="text"
-        />
-        <button
-          onClick={() => {
-            searchFriendThunk(valueTextInput);
-            getPhotosThunk();
-            setValueTextInput("");
-          }}
-          className={styles.button_search}
-        >
-          Search
-        </button>
-        <div className={styles.block_friends}>
-          <button onClick={getFriendsThunk}>All Friends</button>
-          {name_surname.map((el, index) => (
-            <Friend key={`fln_${index}`} name_surname={name_surname[index]} />
-          ))}
+      <div className={styles.app_block_action_wrapper}>
+        <div className={styles.App}>
+          <input
+            value={valueTextInput}
+            onChange={e => setValueTextInput(e.target.value)}
+            type="text"
+          />
+          <button
+            onClick={() => {
+              searchFriendThunk(valueTextInput);
+              setValueTextInput("");
+            }}
+            className={styles.button_search}
+          >
+            Search
+          </button>
+          <div className={styles.block_friends}>
+            <button onClick={getFriendsThunk}>All Friends</button>
+            {friend.map((el, index) => (
+              <Friend  onClick={getPhotosThunk}  key={`fln_${index}`} friend={friend[index]} />
+            ))}
+          </div>
+        </div>
+        <div className={styles.rightArea}>
+          <button className={styles.button_count_photos}>
+            Фотографий:{/*  {count_photos} */}
+          </button>
         </div>
       </div>
     </div>
@@ -76,8 +73,9 @@ const App = props => {
 
 export default connect(
   state => ({
-    name_surname: state.friendsReducer,
-    name_surname_liked: state.photosReducer
+    friend: state.friendsReducer,
+    name_surname_liked: state.inspectReducer,
+    count_photos: state.inspectReducer.count
   }),
   {
     getFriendsThunk,
