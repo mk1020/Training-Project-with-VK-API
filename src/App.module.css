@@ -5,8 +5,8 @@
 
 .app_block_action_wrapper{
   display: flex;
-  margin-top: 170px;
-  margin-left: 30px;
+  margin-top: 20px;
+  margin-left: 20px;
 }
 .App {
 
@@ -68,6 +68,14 @@
   background-color: #e9e9e9;
   margin-bottom: 3px;
 }
+.button_count_photos:focus{ 
+  outline: none;
+}
+
+.wrapper_rightArea{
+  display: flex;
+
+}
 
 .rightArea{
   margin-top: 32px;
@@ -76,6 +84,7 @@
   flex-direction: column;
   align-items: center;
 }
+
 .button_show_photos{
   font-family: 'Prompt', sans-serif;
   font-weight: 400;
@@ -84,6 +93,37 @@
   background-color: #e9e9e9;
   margin-bottom: 3px;
   border-radius: 10px;
-  width: 70px;
+  width: 55px;
 }
 
+.button_show_photos:focus{ 
+  outline: none;
+}
+
+.block_photos{
+  margin-top: 30px;
+  margin-left: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  overflow: auto;
+  width:  410px;
+  height: 263px;
+  border: 2px ridge #e9e9e9;
+}
+
+.imgFriendNoOpacity{
+  width: 130px;
+  height: 130px;
+  margin-bottom: 3px;
+}
+
+.imgFriendWithOpacity{
+  width: 130px;
+  height: 130px;
+  margin-bottom: 3px;
+  opacity: 60%;
+}
+
+.block_photos img:nth-child(1n),.block_photos img:nth-child(2n) {
+  margin-right: 3px;
+}

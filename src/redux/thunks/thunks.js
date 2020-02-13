@@ -18,7 +18,7 @@ export const getFriendsThunk = () => dispatch =>
     "friends.get",
     { v: 5.103, fields: "firsname", access_token: api_token },
     data => {
-      dispatch(areaFriend(data.response.items));
+      data.response && dispatch(areaFriend(data.response.items));
     }
   );
 
@@ -31,7 +31,7 @@ export const searchFriendThunk = search_line => dispatch =>
       v: 5.103,
       access_token: api_token
     },
-    data => dispatch(areaFriend(data.response.items))
+    data => data.response && dispatch(areaFriend(data.response.items))
   );
 
 /* window.VK.api(
@@ -45,7 +45,7 @@ export const searchFriendThunk = search_line => dispatch =>
   }
 ); */
 
-export const getPhotosThunk = user_id => dispatch =>
+export const getPhotosThunk = (user_id, arrayIdImg = true) => dispatch =>
   window.VK.api(
     //получаем id фоток
     "photos.getAll",
@@ -56,46 +56,53 @@ export const getPhotosThunk = user_id => dispatch =>
       access_token: api_token
     },
     data => {
-      dispatch(allPhotos(data.response));
-      const forWithSleep = async () => {
-        for (const el of data.response.items) {
-          window.VK.api(
-            // получаем массив id пользователей, которые лайкнули
-            "likes.getList",
-            {
-              type: "photo",
-              owner_id: user_id,
-              item_id: el.id,
-              count: 1000,
-              v: 5.103,
-              access_token: api_token
-            },
-            data => {
-              let IdLikedPeople = "";
-              data.response.items.forEach(el => {
-                // в ответе объект, в котором массив id людей, которые лайкнули
-                IdLikedPeople === "" //для ускорения, а может и не только, берём все id из массива
-                  ? (IdLikedPeople = IdLikedPeople + el) //и кидаем их в строку через запятую, а потом делаем запрос
-                  : (IdLikedPeople = IdLikedPeople + "," + el); //в который кинем эту строку idшников и он мнесто них вернет массив имен и фамилий
-              });
-              window.VK.api(
-                //массив имён и фамилий получившийся из списка id пользователей
-                "users.get",
-                {
-                  user_ids: IdLikedPeople,
-                  v: "5.103",
-                  access_token: api_token
-                },
-                data => {
-                  dispatch(nameSurnameLikedPeople(data.response));
-                }
-              );
-            }
-          );
-          await sleep(1500);
-        }
-      };
-      forWithSleep()
+      data.response && dispatch(allPhotos(data.response));
+      if (arrayIdImg && data.response) {
+        arrayIdImg = data.response.items;
+      }
+      if (data.response && arrayIdImg!==false) {
+        const forWithSleep = async () => {
+          for (const el of arrayIdImg) {
+            window.VK.api(
+              // получаем массив id пользователей, которые лайкнули
+              "likes.getList",
+              {
+                type: "photo",
+                owner_id: user_id,
+                item_id: el.id,
+                count: 1000,
+                v: 5.103,
+                access_token: api_token
+              },
+              data => {
+                let IdLikedPeople = "";
+                data.response &&
+                  data.response.items.forEach(el => {
+                    // в ответе объект, в котором массив id людей, которые лайкнули
+                    IdLikedPeople === "" //для ускорения, а может и не только, берём все id из массива
+                      ? (IdLikedPeople = IdLikedPeople + el) //и кидаем их в строку через запятую, а потом делаем запрос
+                      : (IdLikedPeople = IdLikedPeople + "," + el); //в который кинем эту строку idшников и он мнесто них вернет массив имен и фамилий
+                  });
+                window.VK.api(
+                  //массив имён и фамилий получившийся из списка id пользователей
+                  "users.get",
+                  {
+                    user_ids: IdLikedPeople,
+                    v: "5.103",
+                    access_token: api_token
+                  },
+                  data => {
+                    data.response &&
+                      dispatch(nameSurnameLikedPeople(data.response));
+                  }
+                );
+              }
+            );
+            await sleep(1500);
+          }
+        };
+        forWithSleep();
+      }
     }
   );
 
@@ -104,3 +111,5 @@ export const getPhotosThunk = user_id => dispatch =>
 //   только женщин) --> показывается список тех, кто лайкнул
 //   и кнопка "показать всех кто лайкал(или мужчин, женщин")
 //   потом список тех кого лайкал какой-то человек
+
+// кому понравилось?
