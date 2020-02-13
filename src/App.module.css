@@ -120,6 +120,7 @@
 .imgFriendWithOpacity{
   width: 130px;
   height: 130px;
+  border: 1px solid #000;
   margin-bottom: 3px;
   opacity: 60%;
 }

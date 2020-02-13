@@ -45,7 +45,7 @@ export const searchFriendThunk = search_line => dispatch =>
   }
 ); */
 
-export const getPhotosThunk = (user_id, arrayIdImg = true) => dispatch =>
+export const getPhotosThunk = (user_id, arrayIdImg = false) => dispatch =>
   window.VK.api(
     //получаем id фоток
     "photos.getAll",

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./App.module.css";
 import {
   getFriendsThunk,
@@ -35,12 +35,13 @@ const App = props => {
     photos
   } = props;
 
-  let [valueTextInput, setValueTextInput] = useState("");
-  let [onClickFriend, setOnClickFriend] = useState(false);
-  let [onClickShow, setOnClickShow] = useState(false);
-  let [arraySelectedImg, changeArraySelectedImg] = useState([]);
+  const [valueTextInput, setValueTextInput] = useState("");
+  const [onClickFriend, setOnClickFriend] = useState(false);
+  const [onClickShow, setOnClickShow] = useState(false);
+  const [arraySelectedPhoto, changeArraySelectedPhoto] = useState([]);
+  const [selectedFriend, changeSelectedFriend] = useState(0);
 
-  console.log("11", photos);
+  console.log("11", arraySelectedPhoto);
   return (
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
@@ -67,7 +68,9 @@ const App = props => {
                 onClick={() => {
                   setOnClickFriend(true);
                   setOnClickShow(false);
-                  getPhotosThunk(friend[index].id, false);
+                  changeSelectedFriend(friend[index].id);
+                  getPhotosThunk(selectedFriend, false);
+
                 }}
                 key={`fln_${index}`}
                 friend={friend[index]}
@@ -91,35 +94,23 @@ const App = props => {
             {onClickShow ? (
               <div className={styles.block_photos}>
                 {photos &&
-                  photos.map((el, index) =>
-                    arraySelectedImg.find(item => item.id === el.id) ? (
-                      <img
-                        src={el.sizes[2].url}
-                        alt="img"
-                        key={`img_${index}`}
-                        className={styles.imgFriendWithOpacity}
-                        onClick={() => {
-                          changeArraySelectedImg([
-                            ...arraySelectedImg,
-                            { id: el.id }
-                          ]);
-                        }}
-                      />
-                    ) : (
-                      <img
-                        src={el.sizes[2].url}
-                        alt="img"
-                        key={`img_${index}`}
-                        className={styles.imgFriendNoOpacity}
-                        onClick={() =>
-                          changeArraySelectedImg([
-                            ...arraySelectedImg,
-                            { id: el.id }
-                          ])
-                        }
-                      />
-                    )
-                  )}
+                  photos.map((el, index) => (
+                    <img
+                      src={el.sizes[2].url}
+                      alt="img"
+                      key={`img_${index}`}
+                      className={
+                        arraySelectedPhoto[el.id]
+                          ? styles.imgFriendWithOpacity
+                          : styles.imgFriendNoOpacity
+                      }
+                      onClick={() => {
+                       // getPhotosThunk(selectedFriend, )
+                        changeArraySelectedPhoto([ ...arraySelectedPhoto, {id: el.id} ]);
+
+                      }}
+                    />
+                  ))}
               </div>
             ) : null}
           </div>
