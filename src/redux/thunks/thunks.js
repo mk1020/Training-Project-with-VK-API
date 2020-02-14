@@ -1,9 +1,5 @@
 import * as axios from "axios";
-import {
-  areaFriend,
-  nameSurnameLikedPeople,
-  allPhotos
-} from "../actions/actions";
+import { areaFriend, Id_LikedPeople, allPhotos } from "../actions/actions";
 // move to .env
 const api_token =
   "7b0cb4e7a555154329829579c4f2098c17641ade88bf6ce391f0c4236db9f05efddf0713a8bb64124a003";
@@ -55,13 +51,17 @@ export const getPhotosThunk = (user_id, arrayIdImg = false) => dispatch =>
       v: "5.103",
       access_token: api_token
     },
-    data => {
-      data.response && dispatch(allPhotos(data.response));
-      if (arrayIdImg && data.response) {
-        arrayIdImg = data.response.items;
+    dataPhotos => {
+      console.log("array obj", dataPhotos.response.items);
+
+      dataPhotos.response && dispatch(allPhotos(dataPhotos.response));
+
+      if (arrayIdImg === true && dataPhotos.response) {
+        arrayIdImg = dataPhotos.response.items;
       }
-      if (data.response && arrayIdImg!==false) {
+      if (dataPhotos.response && arrayIdImg) {
         const forWithSleep = async () => {
+          arrayIdImg = Object.keys(arrayIdImg); // массив id фоток [123,125, 543 и тд]
           for (const el of arrayIdImg) {
             window.VK.api(
               // получаем массив id пользователей, которые лайкнули
@@ -69,7 +69,7 @@ export const getPhotosThunk = (user_id, arrayIdImg = false) => dispatch =>
               {
                 type: "photo",
                 owner_id: user_id,
-                item_id: el.id,
+                item_id: typeof el == "string" ? el : el.id,
                 count: 1000,
                 v: 5.103,
                 access_token: api_token
@@ -84,16 +84,16 @@ export const getPhotosThunk = (user_id, arrayIdImg = false) => dispatch =>
                       : (IdLikedPeople = IdLikedPeople + "," + el); //в который кинем эту строку idшников и он мнесто них вернет массив имен и фамилий
                   });
                 window.VK.api(
-                  //массив имён и фамилий получившийся из списка id пользователей
+                  //массив объектов, имена и фамилии получившийся из списка id пользователей
                   "users.get",
                   {
                     user_ids: IdLikedPeople,
                     v: "5.103",
                     access_token: api_token
                   },
-                  data => {
+                  data => { //console.log("el = ", typeof el)
                     data.response &&
-                      dispatch(nameSurnameLikedPeople(data.response));
+                      dispatch(Id_LikedPeople(typeof el == "string" ? el : el.id, data.response));
                   }
                 );
               }
@@ -113,3 +113,6 @@ export const getPhotosThunk = (user_id, arrayIdImg = false) => dispatch =>
 //   потом список тех кого лайкал какой-то человек
 
 // кому понравилось?
+//кто поставил лайк?
+//Фильтр:
+//все м ж

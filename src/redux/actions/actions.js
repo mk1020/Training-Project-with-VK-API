@@ -1,7 +1,7 @@
  // todo: rename
 
 export const AREA_FRIENDS = "AREA_FRIENDS"; 
-export const NAME_SURNAME_LIKED_PEOPLE = "NAME_SURNAME_LIKED_PEOPLE";
+export const ARRAY_LIKED_PEOPLE = "ARRAY_LIKED_PEOPLE";
 export const ALL_PHOTOS = "ALL_PHOTOS";
 
 export const areaFriend = (arrayFriends) => ({
@@ -9,9 +9,10 @@ export const areaFriend = (arrayFriends) => ({
  arrayFriends: arrayFriends
 })
 
-export const nameSurnameLikedPeople = (arrayNameSurname)=> ({
-    type: NAME_SURNAME_LIKED_PEOPLE,
-    arrayNameSurname: arrayNameSurname
+export const Id_LikedPeople = (idPhoto, arrayLikedPeople)=> ({
+    type: ARRAY_LIKED_PEOPLE,
+    arrayLikedPeople: arrayLikedPeople,
+    idPhoto: idPhoto
 })
 
 export const allPhotos = (photos) => ({

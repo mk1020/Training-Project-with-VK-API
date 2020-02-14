@@ -6,6 +6,9 @@ import {
   getPhotosThunk
 } from "./redux/thunks/thunks";
 import { connect } from "react-redux";
+import img_man_women from "./img/man-women.png";
+import img_man from "./img/man.png";
+import img_women from "./img/women.png";
 
 const Friend = props => {
   return (
@@ -29,19 +32,34 @@ const App = props => {
     friend,
     getFriendsThunk,
     searchFriendThunk,
-    name_surname_liked,
+    Id_LikedPeople,
     getPhotosThunk,
     count_photos,
     photos
   } = props;
-
   const [valueTextInput, setValueTextInput] = useState("");
-  const [onClickFriend, setOnClickFriend] = useState(false);
   const [onClickShow, setOnClickShow] = useState(false);
-  const [arraySelectedPhoto, changeArraySelectedPhoto] = useState([]);
+  const [selectedPhotos, changeSelectedPhotos] = useState({});
   const [selectedFriend, changeSelectedFriend] = useState(0);
+  const [selectedFilter, changeSelectedFilter] = useState(false);
+  const [count_likes, changeCount_likes] = useState(0);
+  useEffect(() => {
+    getPhotosThunk(selectedFriend, false);
+  }, [selectedFriend]);
 
-  console.log("11", arraySelectedPhoto);
+  useEffect(() => {
+    getPhotosThunk(selectedFriend, selectedPhotos);
+  }, [selectedPhotos]);
+
+  useEffect(() => {
+    if (Id_LikedPeople) {
+      let count = 0;
+      for (let key in Id_LikedPeople) count += Id_LikedPeople[key].length;
+      changeCount_likes(count);
+    }
+  }, [Id_LikedPeople]);
+  console.log("Id_LikedPeople", Id_LikedPeople);
+  console.log("count_likes ", count_likes);
   return (
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
@@ -66,11 +84,8 @@ const App = props => {
             {friend.map((el, index) => (
               <Friend
                 onClick={() => {
-                  setOnClickFriend(true);
                   setOnClickShow(false);
                   changeSelectedFriend(friend[index].id);
-                  getPhotosThunk(selectedFriend, false);
-
                 }}
                 key={`fln_${index}`}
                 friend={friend[index]}
@@ -78,7 +93,7 @@ const App = props => {
             ))}
           </div>
         </div>
-        {onClickFriend ? (
+        {selectedFriend !== 0 ? (
           <div className={styles.wrapper_rightArea}>
             <div className={styles.rightArea}>
               <button className={styles.button_count_photos}>
@@ -90,6 +105,36 @@ const App = props => {
               >
                 Show
               </button>
+              <h5 className={styles.h5}>who put a like?</h5>
+              <div className={styles.filter}>Filter:</div>
+              <div
+                onClick={() => {
+                  changeSelectedFilter("man-women");
+                }}
+                className={styles.img_man_women}
+              >
+                <img
+                  onClick={() => changeSelectedFilter("man")}
+                  className={styles.img_man}
+                  src={img_man}
+                  alt="img-man"
+                />
+                <img
+                  onClick={() => changeSelectedFilter("women")}
+                  className={styles.img_women}
+                  src={img_women}
+                  alt="img-women"
+                />
+              </div>
+              <img className={styles.img_man} src={img_man} alt="img-man" />
+              <img
+                className={styles.img_women}
+                src={img_women}
+                alt="img-women"
+              />
+              {selectedFilter === "man-women" ? (
+                <div className={styles.count_likes}> Count: {count_likes}</div>
+              ) : null}
             </div>
             {onClickShow ? (
               <div className={styles.block_photos}>
@@ -100,19 +145,23 @@ const App = props => {
                       alt="img"
                       key={`img_${index}`}
                       className={
-                        arraySelectedPhoto[el.id]
+                        selectedPhotos[el.id]
                           ? styles.imgFriendWithOpacity
                           : styles.imgFriendNoOpacity
                       }
                       onClick={() => {
-                       // getPhotosThunk(selectedFriend, )
-                        changeArraySelectedPhoto([ ...arraySelectedPhoto, {id: el.id} ]);
-
+                        let item = {};
+                        item[el.id] = !selectedPhotos[el.id];
+                        changeSelectedPhotos({
+                          ...selectedPhotos,
+                          ...item
+                        });
                       }}
                     />
                   ))}
               </div>
-            ) : null}
+            ) : null}{" "}
+            .
           </div>
         ) : null}
       </div>
@@ -123,7 +172,7 @@ const App = props => {
 export default connect(
   state => ({
     friend: state.friendsReducer,
-    name_surname_liked: state.inspectReducer,
+    Id_LikedPeople: state.inspectReducer.Id_LikedPeople,
     count_photos: state.inspectReducer.count,
     photos: state.inspectReducer.items
   }),
