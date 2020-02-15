@@ -9,6 +9,8 @@ import { connect } from "react-redux";
 import img_man_women from "./img/man-women.png";
 import img_man from "./img/man.png";
 import img_women from "./img/women.png";
+import img_smile from "./img/smile-3173976_640.png";
+import { defaultStateInspect } from "./redux/actions/actions";
 
 const Friend = props => {
   return (
@@ -32,17 +34,19 @@ const App = props => {
     friend,
     getFriendsThunk,
     searchFriendThunk,
-    Id_LikedPeople,
+    likedPeople,
     getPhotosThunk,
     count_photos,
-    photos
+    photos,
+    defaultStateInspect
   } = props;
   const [valueTextInput, setValueTextInput] = useState("");
   const [onClickShow, setOnClickShow] = useState(false);
   const [selectedPhotos, changeSelectedPhotos] = useState({});
   const [selectedFriend, changeSelectedFriend] = useState(0);
-  const [selectedFilter, changeSelectedFilter] = useState(false);
-  const [count_likes, changeCount_likes] = useState(0);
+  const [selectedFilter, changeSelectedFilter] = useState(-1);
+  const [count_likes, changeCount_likes] = useState(-1);
+
   useEffect(() => {
     getPhotosThunk(selectedFriend, false);
   }, [selectedFriend]);
@@ -52,14 +56,32 @@ const App = props => {
   }, [selectedPhotos]);
 
   useEffect(() => {
-    if (Id_LikedPeople) {
+    if (likedPeople) {
       let count = 0;
-      for (let key in Id_LikedPeople) count += Id_LikedPeople[key].length;
+      for (let key in likedPeople) {
+        //   debugger;
+        selectedFilter === "man-women"
+          ? (count += likedPeople[key].length)
+          : likedPeople[key].forEach(el => {
+              switch (selectedFilter) {
+                case "man":
+                  if (el.sex === 2) count++;
+                  break;
+                case "women":
+                  if (el.sex === 1) count++;
+                  break;
+              }
+            });
+      }
       changeCount_likes(count);
     }
-  }, [Id_LikedPeople]);
-  console.log("Id_LikedPeople", Id_LikedPeople);
-  console.log("count_likes ", count_likes);
+  }, [selectedFilter]);
+
+  useEffect(() => {
+    getFriendsThunk();
+  }, []);
+
+//todo перерэндэрить компонент когда likedPeople из redux меняется
   return (
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
@@ -80,11 +102,15 @@ const App = props => {
             Search
           </button>
           <div className={styles.block_friends}>
-            <button onClick={getFriendsThunk}>All Friends</button>
+            <button>All Friends</button>
             {friend.map((el, index) => (
               <Friend
                 onClick={() => {
+                  defaultStateInspect();
                   setOnClickShow(false);
+                  changeSelectedPhotos({});
+                  changeSelectedFilter(-1); // почему, когда меняю SelectedFilter, не срабатывает useEffect
+                  changeCount_likes(-1);
                   changeSelectedFriend(friend[index].id);
                 }}
                 key={`fln_${index}`}
@@ -111,7 +137,36 @@ const App = props => {
                 onClick={() => {
                   changeSelectedFilter("man-women");
                 }}
-                className={styles.img_man_women}
+                className={
+                  likedPeople &&
+                  Object.keys(likedPeople).length ===
+                    Object.keys(selectedPhotos).length
+                    ? styles.wrapper_img_man_women
+                    : styles.wrapper_img_man_women_opacity
+                }
+              >
+                <img className={styles.img_man} src={img_man} alt="img-man" />
+                <img
+                  className={styles.img_women}
+                  src={img_women}
+                  alt="img-women"
+                />
+                {selectedFilter === "man-women" ? (
+                  <img
+                    src={img_smile}
+                    className={styles.img_smile}
+                    alt="img-smile"
+                  />
+                ) : null}
+              </div>
+              <div
+                className={
+                  likedPeople &&
+                  Object.keys(likedPeople).length ===
+                    Object.keys(selectedPhotos).length
+                    ? styles.wrapper_img_man
+                    : styles.wrapper_img_man_opacity
+                }
               >
                 <img
                   onClick={() => changeSelectedFilter("man")}
@@ -119,20 +174,43 @@ const App = props => {
                   src={img_man}
                   alt="img-man"
                 />
+                {selectedFilter === "man" ? (
+                  <img
+                    src={img_smile}
+                    className={styles.img_smile}
+                    alt="img-smile"
+                  />
+                ) : null}
+              </div>
+              <div
+                className={
+                  likedPeople &&
+                  Object.keys(likedPeople).length ===
+                    Object.keys(selectedPhotos).length
+                    ? styles.wrapper_img_women
+                    : styles.wrapper_img_women_opacity
+                }
+              >
                 <img
                   onClick={() => changeSelectedFilter("women")}
                   className={styles.img_women}
                   src={img_women}
                   alt="img-women"
                 />
+                {selectedFilter === "women" ? (
+                  <img
+                    src={img_smile}
+                    className={styles.img_smile}
+                    alt="img-smile"
+                  />
+                ) : null}
               </div>
-              <img className={styles.img_man} src={img_man} alt="img-man" />
-              <img
-                className={styles.img_women}
-                src={img_women}
-                alt="img-women"
-              />
-              {selectedFilter === "man-women" ? (
+              {(selectedFilter === "man-women" ||
+                selectedFilter === "man" ||
+                selectedFilter === "women") &&
+              count_likes !== -1 &&
+              Object.keys(likedPeople).length ===
+                Object.keys(selectedPhotos).length ? (
                 <div className={styles.count_likes}> Count: {count_likes}</div>
               ) : null}
             </div>
@@ -150,6 +228,8 @@ const App = props => {
                           : styles.imgFriendNoOpacity
                       }
                       onClick={() => {
+                        changeSelectedFilter(-1);
+                        changeCount_likes(-1);
                         let item = {};
                         item[el.id] = !selectedPhotos[el.id];
                         changeSelectedPhotos({
@@ -172,14 +252,15 @@ const App = props => {
 export default connect(
   state => ({
     friend: state.friendsReducer,
-    Id_LikedPeople: state.inspectReducer.Id_LikedPeople,
+    likedPeople: state.inspectReducer.likedPeople,
     count_photos: state.inspectReducer.count,
     photos: state.inspectReducer.items
   }),
   {
     getFriendsThunk,
     searchFriendThunk,
-    getPhotosThunk
+    getPhotosThunk,
+    defaultStateInspect
   }
 )(App);
 

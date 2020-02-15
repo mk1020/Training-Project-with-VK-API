@@ -1,5 +1,5 @@
 import * as axios from "axios";
-import { areaFriend, Id_LikedPeople, allPhotos } from "../actions/actions";
+import { areaFriend, likedPeople, allPhotos } from "../actions/actions";
 // move to .env
 const api_token =
   "7b0cb4e7a555154329829579c4f2098c17641ade88bf6ce391f0c4236db9f05efddf0713a8bb64124a003";
@@ -52,7 +52,6 @@ export const getPhotosThunk = (user_id, arrayIdImg = false) => dispatch =>
       access_token: api_token
     },
     dataPhotos => {
-      console.log("array obj", dataPhotos.response.items);
 
       dataPhotos.response && dispatch(allPhotos(dataPhotos.response));
 
@@ -89,11 +88,12 @@ export const getPhotosThunk = (user_id, arrayIdImg = false) => dispatch =>
                   {
                     user_ids: IdLikedPeople,
                     v: "5.103",
+                    fields: "sex",
                     access_token: api_token
                   },
                   data => { //console.log("el = ", typeof el)
                     data.response &&
-                      dispatch(Id_LikedPeople(typeof el == "string" ? el : el.id, data.response));
+                      dispatch(likedPeople(typeof el == "string" ? el : el.id, data.response));
                   }
                 );
               }
