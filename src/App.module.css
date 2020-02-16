@@ -73,6 +73,8 @@
 
 .wrapper_rightArea {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .rightArea {
@@ -81,6 +83,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden;
 }
 
 .button_show_photos {
@@ -199,4 +202,20 @@
 .img_smile {
   width: 37px;
   height: 37px;
+}
+
+
+.button_enter{
+  font-family: "Prompt", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  padding: 2px 4px 2px 4px;
+  background-color: #e9e9e9;
+  border-radius: 10px;
+  width: auto;
+  height: 30px;
+}
+
+.button_enter:focus{
+  outline: none;
 }

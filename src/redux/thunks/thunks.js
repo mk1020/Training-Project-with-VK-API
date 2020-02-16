@@ -57,10 +57,12 @@ export const getPhotosThunk = (user_id, arrayIdImg = false) => dispatch =>
 
       if (arrayIdImg === true && dataPhotos.response) {
         arrayIdImg = dataPhotos.response.items;
+        debugger;
       }
       if (dataPhotos.response && arrayIdImg) {
         const forWithSleep = async () => {
           arrayIdImg = Object.keys(arrayIdImg); // массив id фоток [123,125, 543 и тд]
+            console.log("arrayIdImg thunk", arrayIdImg)
           for (const el of arrayIdImg) {
             window.VK.api(
               // получаем массив id пользователей, которые лайкнули

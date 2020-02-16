@@ -51,23 +51,25 @@ const App = props => {
     getPhotosThunk(selectedFriend, false);
   }, [selectedFriend]);
 
-  useEffect(() => {
+  /*  useEffect(() => {
     getPhotosThunk(selectedFriend, selectedPhotos);
-  }, [selectedPhotos]);
+  }, [selectedFilter]); */
 
   useEffect(() => {
+    console.log("selected Photos ", selectedPhotos);
+    console.log("liked people ", likedPeople);
     if (likedPeople) {
       let count = 0;
       for (let key in likedPeople) {
         //   debugger;
-        selectedFilter === "man-women"
+        selectedFilter === "man-women" || selectedFilter === "man-women-change"
           ? (count += likedPeople[key].length)
           : likedPeople[key].forEach(el => {
               switch (selectedFilter) {
-                case "man":
+                case "man" || "man-change":
                   if (el.sex === 2) count++;
                   break;
-                case "women":
+                case "women" || "women-change":
                   if (el.sex === 1) count++;
                   break;
               }
@@ -81,7 +83,7 @@ const App = props => {
     getFriendsThunk();
   }, []);
 
-//todo перерэндэрить компонент когда likedPeople из redux меняется
+  //todo перерэндэрить компонент когда likedPeople из redux меняется
   return (
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
@@ -135,7 +137,9 @@ const App = props => {
               <div className={styles.filter}>Filter:</div>
               <div
                 onClick={() => {
-                  changeSelectedFilter("man-women");
+                  selectedFilter === "man-women"
+                    ? changeSelectedFilter("man-women-change")
+                    : changeSelectedFilter("man-women");
                 }}
                 className={
                   likedPeople &&
@@ -151,7 +155,11 @@ const App = props => {
                   src={img_women}
                   alt="img-women"
                 />
-                {selectedFilter === "man-women" ? (
+                {(selectedFilter === "man-women" ||
+                  selectedFilter === "man-women-change") &&
+                likedPeople &&
+                Object.keys(likedPeople).length ===
+                  Object.keys(selectedPhotos).length ? (
                   <img
                     src={img_smile}
                     className={styles.img_smile}
@@ -169,12 +177,20 @@ const App = props => {
                 }
               >
                 <img
-                  onClick={() => changeSelectedFilter("man")}
+                  onClick={() =>
+                    selectedFilter === "man"
+                      ? changeSelectedFilter("man-change")
+                      : changeSelectedFilter("man")
+                  }
                   className={styles.img_man}
                   src={img_man}
                   alt="img-man"
                 />
-                {selectedFilter === "man" ? (
+                {(selectedFilter === "man" ||
+                  selectedFilter === "man=change") &&
+                likedPeople &&
+                Object.keys(likedPeople).length ===
+                  Object.keys(selectedPhotos).length ? (
                   <img
                     src={img_smile}
                     className={styles.img_smile}
@@ -192,12 +208,20 @@ const App = props => {
                 }
               >
                 <img
-                  onClick={() => changeSelectedFilter("women")}
+                  onClick={() =>
+                    selectedFilter === "women"
+                      ? changeSelectedFilter("women-change")
+                      : changeSelectedFilter("women")
+                  }
                   className={styles.img_women}
                   src={img_women}
                   alt="img-women"
                 />
-                {selectedFilter === "women" ? (
+                {(selectedFilter === "women" ||
+                  selectedFilter === "women-change") &&
+                likedPeople &&
+                Object.keys(likedPeople).length ===
+                  Object.keys(selectedPhotos).length ? (
                   <img
                     src={img_smile}
                     className={styles.img_smile}
@@ -241,7 +265,14 @@ const App = props => {
                   ))}
               </div>
             ) : null}{" "}
-            .
+            {Object.keys(selectedPhotos).length !== 0 ? (
+              <button
+                className={styles.button_enter}
+                onClick={() => getPhotosThunk(selectedFriend, selectedPhotos)}
+              >
+                Enter
+              </button>
+            ) : null}
           </div>
         ) : null}
       </div>
