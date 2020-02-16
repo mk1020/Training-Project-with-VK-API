@@ -5,6 +5,7 @@ import {
   searchFriendThunk,
   getPhotosThunk
 } from "./redux/thunks/thunks";
+import {loadFriends} from './redux/actions'
 import { connect } from "react-redux";
 import img_man_women from "./img/man-women.png";
 import img_man from "./img/man.png";
@@ -38,7 +39,7 @@ const App = props => {
     getPhotosThunk,
     count_photos,
     photos,
-    defaultStateInspect
+    defaultStateInspect, loadFriends
   } = props;
   const [valueTextInput, setValueTextInput] = useState("");
   const [onClickShow, setOnClickShow] = useState(false);
@@ -47,6 +48,8 @@ const App = props => {
   const [selectedFilter, changeSelectedFilter] = useState(-1);
   const [count_likes, changeCount_likes] = useState(-1);
 
+
+  
   useEffect(() => {
     getPhotosThunk(selectedFriend, false);
   }, [selectedFriend]);
@@ -81,6 +84,7 @@ const App = props => {
 
   useEffect(() => {
     getFriendsThunk();
+    loadFriends();
   }, []);
 
   //todo перерэндэрить компонент когда likedPeople из redux меняется
@@ -291,7 +295,7 @@ export default connect(
     getFriendsThunk,
     searchFriendThunk,
     getPhotosThunk,
-    defaultStateInspect
+    defaultStateInspect, loadFriends
   }
 )(App);
 
