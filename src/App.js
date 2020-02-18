@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import styles from "./App.module.css";
 import {
-  getFriendsThunk,
+  loadFriends,
   searchFriendThunk,
-  getPhotosThunk
-} from "./redux/thunks/thunks";
+  getPhotosThunk,
+  defaultStateInspect
+} from "./redux/actions/actions";
 import { connect } from "react-redux";
 import img_man_women from "./img/man-women.png";
 import img_man from "./img/man.png";
 import img_women from "./img/women.png";
 import img_smile from "./img/smile-3173976_640.png";
-import { defaultStateInspect } from "./redux/actions/actions";
 
 const Friend = props => {
   return (
@@ -31,8 +31,8 @@ const App = props => {
   );
 
   const {
-    friend,
-    getFriendsThunk,
+    friends,
+    loadFriends,
     searchFriendThunk,
     likedPeople,
     getPhotosThunk,
@@ -46,7 +46,7 @@ const App = props => {
   const [selectedFriend, changeSelectedFriend] = useState(0);
   const [selectedFilter, changeSelectedFilter] = useState(-1);
   const [count_likes, changeCount_likes] = useState(-1);
-
+  const user_id = 43463557;
   useEffect(() => {
     getPhotosThunk(selectedFriend, false);
   }, [selectedFriend]);
@@ -80,7 +80,7 @@ const App = props => {
   }, [selectedFilter]);
 
   useEffect(() => {
-    getFriendsThunk();
+    loadFriends();
   }, []);
 
   //todo перерэндэрить компонент когда likedPeople из redux меняется
@@ -96,7 +96,7 @@ const App = props => {
           />
           <button
             onClick={() => {
-              searchFriendThunk(valueTextInput);
+              searchFriendThunk(valueTextInput, user_id);
               setValueTextInput("");
             }}
             className={styles.button_search}
@@ -105,7 +105,7 @@ const App = props => {
           </button>
           <div className={styles.block_friends}>
             <button>All Friends</button>
-            {friend.map((el, index) => (
+            {friends && friends.map((el, index) => (
               <Friend
                 onClick={() => {
                   defaultStateInspect();
@@ -113,10 +113,10 @@ const App = props => {
                   changeSelectedPhotos({});
                   changeSelectedFilter(-1); // почему, когда меняю SelectedFilter, не срабатывает useEffect
                   changeCount_likes(-1);
-                  changeSelectedFriend(friend[index].id);
+                  changeSelectedFriend(friends[index].id);
                 }}
                 key={`fln_${index}`}
-                friend={friend[index]}
+                friend={friends[index]}
               />
             ))}
           </div>
@@ -282,13 +282,13 @@ const App = props => {
 
 export default connect(
   state => ({
-    friend: state.friendsReducer,
+    friends: state.friendsReducer.friends,
     likedPeople: state.inspectReducer.likedPeople,
     count_photos: state.inspectReducer.count,
     photos: state.inspectReducer.items
   }),
   {
-    getFriendsThunk,
+    loadFriends,
     searchFriendThunk,
     getPhotosThunk,
     defaultStateInspect
