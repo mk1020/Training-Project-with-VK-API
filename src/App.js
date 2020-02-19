@@ -46,7 +46,7 @@ const App = props => {
   const [selectedFriend, changeSelectedFriend] = useState(0);
   const [selectedFilter, changeSelectedFilter] = useState(-1);
   const [count_likes, changeCount_likes] = useState(-1);
-  const user_id = 43463557;
+  const user_id = 431114446663557;
   useEffect(() => {
     getPhotosThunk(selectedFriend, false);
   }, [selectedFriend]);
