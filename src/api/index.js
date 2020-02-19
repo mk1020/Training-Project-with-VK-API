@@ -7,7 +7,7 @@ export const getFriends = () =>
       "friends.get",
       { v: 5.103, fields: "firsname", access_token: api_token },
       data =>
-        data.response.error ? reject(data.response) : resolve(data.response)
+        data.error ? reject(data) : resolve(data.response)
     )
   );
 
@@ -22,7 +22,7 @@ export const friendsSearch = (search_line, user_id) =>
         access_token: api_token
       },
       data =>
-        data.response.error ? reject(data.response) : resolve(data.response)
+        data.error ? reject(data) : resolve(data.response)
     )
   );
 
@@ -38,7 +38,7 @@ export const photosGetAll = user_id =>
         access_token: api_token
       },
       data =>
-        data.response.error ? reject(data.response) : resolve(data.response)
+        data.error ? reject(data) : resolve(data.response)
     )
   );
 
@@ -56,7 +56,7 @@ export const likesGetList = (user_id, el) =>
         access_token: api_token
       },
       data =>
-        data.response.error ? reject(data.response) : resolve(data.response)
+        data.error ? reject(data) : resolve(data.response)
     )
   );
 
@@ -72,6 +72,6 @@ export const usersGet = IdLikedPeople =>
         access_token: api_token
       },
       data =>
-        data.response.error ? reject(data.response) : resolve(data.response)
+        data.error ? reject(data) : resolve(data.response)
     )
   );

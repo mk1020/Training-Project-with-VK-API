@@ -11,6 +11,12 @@
 .App {
 }
 
+.img_loading{
+   position: absolute;
+   left:50px;
+   top: 140px
+}
+
 .button_friend {
   font-family: "Prompt", sans-serif;
   font-weight: 500;

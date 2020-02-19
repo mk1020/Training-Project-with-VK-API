@@ -2,11 +2,8 @@ import * as types from "../actions/actions";
 
 export const friendsReducer = (state = {}, action) => {
   switch (action.type) {
-    case types.LOAD_FREINDS_REQEST: {
-      return { ...state, friends_reqest: true };
-    }
-    case types.LOAD_FREINDS_RESPONSE: {
-      return { ...state, friends_response: true };
+    case types.LOADING_FREINDS: {
+      return { ...state, friends_loading: !state.friends_loading };
     }
     case types.LOAD_FREINDS_ERROR: {
       return { ...state, friends_response_error: true };

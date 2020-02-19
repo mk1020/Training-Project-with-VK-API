@@ -11,6 +11,7 @@ import img_man_women from "./img/man-women.png";
 import img_man from "./img/man.png";
 import img_women from "./img/women.png";
 import img_smile from "./img/smile-3173976_640.png";
+import img_loading from "./img/loading.svg";
 
 const Friend = props => {
   return (
@@ -38,15 +39,15 @@ const App = props => {
     getPhotosThunk,
     count_photos,
     photos,
-    defaultStateInspect
+    defaultStateInspect,
+    friendsState
   } = props;
   const [valueTextInput, setValueTextInput] = useState("");
-  const [onClickShow, setOnClickShow] = useState(false);
   const [selectedPhotos, changeSelectedPhotos] = useState({});
   const [selectedFriend, changeSelectedFriend] = useState(0);
   const [selectedFilter, changeSelectedFilter] = useState(-1);
   const [count_likes, changeCount_likes] = useState(-1);
-  const user_id = 431114446663557;
+  const user_id = "43463557";
   useEffect(() => {
     getPhotosThunk(selectedFriend, false);
   }, [selectedFriend]);
@@ -88,6 +89,9 @@ const App = props => {
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
       <div className={styles.app_block_action_wrapper}>
+        {friendsState.friends_loading ? (
+          <img className={styles.img_loading} src={img_loading} />
+        ) : null}
         <div className={styles.App}>
           <input
             value={valueTextInput}
@@ -105,20 +109,20 @@ const App = props => {
           </button>
           <div className={styles.block_friends}>
             <button>All Friends</button>
-            {friends && friends.map((el, index) => (
-              <Friend
-                onClick={() => {
-                  defaultStateInspect();
-                  setOnClickShow(false);
-                  changeSelectedPhotos({});
-                  changeSelectedFilter(-1); // почему, когда меняю SelectedFilter, не срабатывает useEffect
-                  changeCount_likes(-1);
-                  changeSelectedFriend(friends[index].id);
-                }}
-                key={`fln_${index}`}
-                friend={friends[index]}
-              />
-            ))}
+            {friends &&
+              friends.map((el, index) => (
+                <Friend
+                  onClick={() => {
+                    defaultStateInspect();
+                    changeSelectedPhotos({});
+                    changeSelectedFilter(-1); // почему, когда меняю SelectedFilter, не срабатывает useEffect
+                    changeCount_likes(-1);
+                    changeSelectedFriend(friends[index].id);
+                  }}
+                  key={`fln_${index}`}
+                  friend={friends[index]}
+                />
+              ))}
           </div>
         </div>
         {selectedFriend !== 0 ? (
@@ -126,12 +130,6 @@ const App = props => {
             <div className={styles.rightArea}>
               <button className={styles.button_count_photos}>
                 Photos: {count_photos}
-              </button>
-              <button
-                onClick={() => setOnClickShow(!onClickShow)}
-                className={styles.button_show_photos}
-              >
-                Show
               </button>
               <h5 className={styles.h5}>who put a like?</h5>
               <div className={styles.filter}>Filter:</div>
@@ -238,33 +236,33 @@ const App = props => {
                 <div className={styles.count_likes}> Count: {count_likes}</div>
               ) : null}
             </div>
-            {onClickShow ? (
-              <div className={styles.block_photos}>
-                {photos &&
-                  photos.map((el, index) => (
-                    <img
-                      src={el.sizes[2].url}
-                      alt="img"
-                      key={`img_${index}`}
-                      className={
-                        selectedPhotos[el.id]
-                          ? styles.imgFriendWithOpacity
-                          : styles.imgFriendNoOpacity
-                      }
-                      onClick={() => {
-                        changeSelectedFilter(-1);
-                        changeCount_likes(-1);
-                        let item = {};
-                        item[el.id] = !selectedPhotos[el.id];
-                        changeSelectedPhotos({
-                          ...selectedPhotos,
-                          ...item
-                        });
-                      }}
-                    />
-                  ))}
-              </div>
-            ) : null}{" "}
+
+            <div className={styles.block_photos}>
+              {photos &&
+                photos.map((el, index) => (
+                  <img
+                    src={el.sizes[2].url}
+                    alt="img"
+                    key={`img_${index}`}
+                    className={
+                      selectedPhotos[el.id]
+                        ? styles.imgFriendWithOpacity
+                        : styles.imgFriendNoOpacity
+                    }
+                    onClick={() => {
+                      changeSelectedFilter(-1);
+                      changeCount_likes(-1);
+                      let item = {};
+                      item[el.id] = !selectedPhotos[el.id];
+                      changeSelectedPhotos({
+                        ...selectedPhotos,
+                        ...item
+                      });
+                    }}
+                  />
+                ))}
+            </div>
+
             {Object.keys(selectedPhotos).length !== 0 ? (
               <button
                 className={styles.button_enter}
@@ -283,6 +281,7 @@ const App = props => {
 export default connect(
   state => ({
     friends: state.friendsReducer.friends,
+    friendsState: state.friendsReducer,
     likedPeople: state.inspectReducer.likedPeople,
     count_photos: state.inspectReducer.count,
     photos: state.inspectReducer.items

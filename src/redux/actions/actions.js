@@ -4,9 +4,9 @@ export const AREA_FRIENDS = "AREA_FRIENDS";
 export const LIKED_PEOPLE = "LIKED_PEOPLE";
 export const ALL_PHOTOS = "ALL_PHOTOS";
 export const DEFAULT_STATE_INSPECT = "DEFAULT_STATE_INSPECT";
-export const LOAD_FREINDS_REQEST = "LOAD_FREINDS_REQEST";
-export const LOAD_FREINDS_RESPONSE = "LOAD_FREINDS_RESPONSE";
+export const LOADING_FREINDS = "LOADING_FREINDS";
 export const LOAD_FREINDS_ERROR = "LOAD_FREINDS_ERROR";
+export const LOADING = "LOADING";
 
 export const areaFriend = arrayFriends => ({
   type: AREA_FRIENDS,
@@ -36,10 +36,10 @@ function sleep(ms) {
 }
 
 export const loadFriends = () => async dispatch => {
-  dispatch({ type: LOAD_FREINDS_REQEST });
+  dispatch({ type: LOADING_FREINDS });
   await api.getFriends().then(
     data => {
-      dispatch({ type: LOAD_FREINDS_RESPONSE });
+      dispatch({ type: LOADING_FREINDS });
       data && dispatch(areaFriend(data.items));
     },
     error => {
