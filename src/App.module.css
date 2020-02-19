@@ -11,11 +11,18 @@
 .App {
 }
 
-.img_loading{
+.img_loading_friends{
    position: absolute;
    left:50px;
    top: 140px
 }
+
+.img_loading_photos{
+  position: absolute;
+  left:480px;
+  top: 100px
+}
+
 
 .button_friend {
   font-family: "Prompt", sans-serif;

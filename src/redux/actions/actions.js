@@ -6,7 +6,9 @@ export const ALL_PHOTOS = "ALL_PHOTOS";
 export const DEFAULT_STATE_INSPECT = "DEFAULT_STATE_INSPECT";
 export const LOADING_FREINDS = "LOADING_FREINDS";
 export const LOAD_FREINDS_ERROR = "LOAD_FREINDS_ERROR";
-export const LOADING = "LOADING";
+export const PHOTOS_LOADING = "PHOTOS_LOADING";
+export const DEFAULT_LIKED_PEOPLE = "DEFAULT_LIKED_PEOPLE";
+export const LIKED_PEOPLE_UP = "LIKED_PEOPLE_UP";
 
 export const areaFriend = arrayFriends => ({
   type: AREA_FRIENDS,
@@ -28,6 +30,9 @@ export const defaultStateInspect = () => ({
   type: DEFAULT_STATE_INSPECT
 });
 
+export const default_liked_people = () => ({
+  type: DEFAULT_LIKED_PEOPLE
+});
 //------------------------------------------------------------------\\
 // move to .env
 
@@ -71,21 +76,21 @@ export const searchFriendThunk = (search_line, user_id) => dispatch =>
   }
 ); */
 
-export const getPhotosThunk = (user_id, arrayIdImg = false) => dispatch =>
+export const getPhotos = (user_id, IdImg = false) => dispatch => {
   //получаем id фоток
+  dispatch({ type: PHOTOS_LOADING });
   api.photosGetAll(user_id).then(
-    dataPhotos => {
-      dataPhotos && dispatch(allPhotos(dataPhotos));
+    async dataPhotos => {
+      dataPhotos && (await dispatch(allPhotos(dataPhotos)));
+      dispatch({ type: PHOTOS_LOADING });
 
-      if (arrayIdImg === true && dataPhotos) {
-        arrayIdImg = dataPhotos.items;
-        debugger;
+      if (IdImg === true && dataPhotos) {
+        IdImg = dataPhotos.items;
       }
-      if (dataPhotos && arrayIdImg) {
+      if (dataPhotos && IdImg) {
         const forWithSleep = async () => {
-          arrayIdImg = Object.keys(arrayIdImg); // массив id фоток [123,125, 543 и тд]
-          console.log("arrayIdImg thunk", arrayIdImg);
-          for (const el of arrayIdImg) {
+          // массив id фоток [123,125, 543 и тд]
+          for (const el in IdImg) {
             // получаем массив id пользователей, которые лайкнули
             api.likesGetList(user_id, el).then(
               data => {
@@ -101,12 +106,15 @@ export const getPhotosThunk = (user_id, arrayIdImg = false) => dispatch =>
                 api.usersGet(IdLikedPeople).then(
                   //массив объектов, имена и фамилии получившийся из списка id пользователей
 
-                  data => {
-                    //console.log("el = ", typeof el)
-                    data &&
-                      dispatch(
-                        likedPeople(typeof el == "string" ? el : el.id, data)
-                      );
+                  async data => {
+                    await dispatch(
+                      likedPeople(typeof el == "string" ? el : el.id, data)
+                    );
+
+                    await dispatch({
+                      type: LIKED_PEOPLE_UP,
+                      IdImg
+                    });
                   },
                   error => {
                     console.log(error.error);
@@ -130,6 +138,7 @@ export const getPhotosThunk = (user_id, arrayIdImg = false) => dispatch =>
       alert("Произошла ошибка! Подробности в консоле.");
     }
   );
+};
 
 //   выбираю человека -->  появляется кнопка позволяющая показать(скрыть) все его фотографии-->
 //   выбираю фотографию и выбираю кнопку (показать всех кто лайкнул,только мужчин,
