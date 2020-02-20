@@ -6,9 +6,12 @@ export const ALL_PHOTOS = "ALL_PHOTOS";
 export const DEFAULT_STATE_INSPECT = "DEFAULT_STATE_INSPECT";
 export const LOADING_FREINDS = "LOADING_FREINDS";
 export const LOAD_FREINDS_ERROR = "LOAD_FREINDS_ERROR";
-export const PHOTOS_LOADING = "PHOTOS_LOADING";
+export const LOAD_PHOTOS_START = "LOAD_PHOTOS_START";
+export const LOAD_PHOTOS_END = "LOAD_PHOTOS_END";
 export const DEFAULT_LIKED_PEOPLE = "DEFAULT_LIKED_PEOPLE";
 export const LIKED_PEOPLE_UP = "LIKED_PEOPLE_UP";
+export const LOAD_INFO_LIKES_START = "LOAD_INFO_LIKES_START";
+export const LOAD_INFO_LIKES_END = "LOAD_INFO_LIKES_END";
 
 export const areaFriend = arrayFriends => ({
   type: AREA_FRIENDS,
@@ -56,7 +59,7 @@ export const loadFriends = () => async dispatch => {
   );
 };
 
-export const searchFriendThunk = (search_line, user_id) => dispatch =>
+export const searchFriend = (search_line, user_id) => dispatch =>
   api.friendsSearch(search_line, user_id).then(
     data => data && dispatch(areaFriend(data.items)),
     error => {
@@ -76,62 +79,69 @@ export const searchFriendThunk = (search_line, user_id) => dispatch =>
   }
 ); */
 
-export const getPhotos = (user_id, IdImg = false) => dispatch => {
+export const getPhotos = (user_id) => dispatch => {
   //получаем id фоток
-  dispatch({ type: PHOTOS_LOADING });
+  dispatch({ type: LOAD_PHOTOS_START });
+  api.photosGetAll(user_id).then(async dataPhotos => {
+    await dispatch(allPhotos(dataPhotos));
+    dispatch({ type: LOAD_PHOTOS_END });
+  });
+};
+
+export const getLikes = (user_id, IdImg = false) => dispatch => {
+  //получаем id фоток
   api.photosGetAll(user_id).then(
     async dataPhotos => {
-      dataPhotos && (await dispatch(allPhotos(dataPhotos)));
-      dispatch({ type: PHOTOS_LOADING });
-
-      if (IdImg === true && dataPhotos) {
+      await dispatch(allPhotos(dataPhotos));
+      if (IdImg === true) {
+        debugger;
         IdImg = dataPhotos.items;
       }
-      if (dataPhotos && IdImg) {
-        const forWithSleep = async () => {
-          // массив id фоток [123,125, 543 и тд]
-          for (const el in IdImg) {
-            // получаем массив id пользователей, которые лайкнули
-            api.likesGetList(user_id, el).then(
-              data => {
-                let IdLikedPeople = "";
-                data &&
-                  data.items.forEach(el => {
-                    // в ответе объект, в котором массив id людей, которые лайкнули
-                    IdLikedPeople === "" //для ускорения, а может и не только, берём все id из массива
-                      ? (IdLikedPeople = IdLikedPeople + el) //и кидаем их в строку через запятую, а потом делаем запрос
-                      : (IdLikedPeople = IdLikedPeople + "," + el); //в который кинем эту строку idшников и он мнесто них вернет массив имен и фамилий
+      dispatch({ type: LOAD_INFO_LIKES_START });
+      const forWithSleep = async () => {
+        // массив id фоток [123,125, 543 и тд]
+        for (const el in IdImg) {
+          // получаем массив id пользователей, которые лайкнули
+          api.likesGetList(user_id, el).then(
+            data => {
+              let IdLikedPeople = "";
+              data &&
+                data.items.forEach(el => {
+                  // в ответе объект, в котором массив id людей, которые лайкнули
+                  IdLikedPeople === "" //для ускорения, а может и не только, берём все id из массива
+                    ? (IdLikedPeople = IdLikedPeople + el) //и кидаем их в строку через запятую, а потом делаем запрос
+                    : (IdLikedPeople = IdLikedPeople + "," + el); //в который кинем эту строку idшников и он мнесто них вернет массив имен и фамилий
+                });
+
+              api.usersGet(IdLikedPeople).then(
+                //массив объектов, имена и фамилии получившийся из списка id пользователей
+
+                async data => {
+                  await dispatch(
+                    likedPeople(typeof el == "string" ? el : el.id, data)
+                  );
+
+                  await dispatch({
+                    type: LIKED_PEOPLE_UP,
+                    IdImg
                   });
-
-                api.usersGet(IdLikedPeople).then(
-                  //массив объектов, имена и фамилии получившийся из списка id пользователей
-
-                  async data => {
-                    await dispatch(
-                      likedPeople(typeof el == "string" ? el : el.id, data)
-                    );
-
-                    await dispatch({
-                      type: LIKED_PEOPLE_UP,
-                      IdImg
-                    });
-                  },
-                  error => {
-                    console.log(error.error);
-                    alert("Произошла ошибка! Подробности в консоле.");
-                  }
-                );
-              },
-              error => {
-                console.log(error.error);
-                alert("Произошла ошибка! Подробности в консоле.");
-              }
-            );
-            await sleep(1500);
-          }
-        };
-        forWithSleep();
-      }
+                },
+                error => {
+                  console.log(error.error);
+                  alert("Произошла ошибка! Подробности в консоле.");
+                }
+              );
+            },
+            error => {
+              console.log(error.error);
+              alert("Произошла ошибка! Подробности в консоле.");
+            }
+          );
+          await sleep(1500);
+        }
+      };
+      await forWithSleep();
+      dispatch({ type: LOAD_INFO_LIKES_END });
     },
     error => {
       console.log(error.error);

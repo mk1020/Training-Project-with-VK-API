@@ -14,15 +14,19 @@
 .img_loading_friends{
    position: absolute;
    left:50px;
-   top: 140px
+   top: 140px;
 }
 
 .img_loading_photos{
   position: absolute;
   left:480px;
+  top: 100px;
+}
+.img_loading_info_likes{
+  position: absolute;
+  left:280px;
   top: 100px
 }
-
 
 .button_friend {
   font-family: "Prompt", sans-serif;
@@ -230,5 +234,20 @@
 }
 
 .button_enter:focus{
+  outline: none;
+}
+
+.button_all_photos{
+  font-family: "Prompt", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  padding: 2px 4px 2px 4px;
+  background-color: #e9e9e9;
+  border-radius: 10px;
+  width: auto;
+  height: 30px;
+}
+
+.button_all_photos:focus{
   outline: none;
 }

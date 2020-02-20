@@ -4,29 +4,34 @@ export const inspectReducer = (state={}, action)=> {
    switch (action.type){
       case types.LIKED_PEOPLE_UP: {
          let likedPeopleCopy={};
-         console.log('IdImg->>', action.IdImg)
             for(const key in state.likedPeople)  if (Object.keys(action.IdImg).indexOf(key)!==-1 )
          likedPeopleCopy[key]=state.likedPeople[key]
             
-            console.log("liked people--->", likedPeopleCopy)
 
          return {...state, likedPeople: likedPeopleCopy}
       }
          case types.LIKED_PEOPLE: {
             let obj = {}
-            console.log("333333333 ")
          
              obj[action.idPhoto] = action.arrayLikedPeople; //объект: id: [массив obj]
            return {...state, likedPeople: {...state.likedPeople, ...obj}} 
        }  
-         case types.PHOTOS_LOADING: {
-          return {...state, photos_loading: !state.photos_loading}
+         case types.LOAD_PHOTOS_START: {
+          return {...state, load_photos_start: true, load_photos_end: false}
        } 
+       case types.LOAD_PHOTOS_END: {
+         return {...state, load_photos_end: true, load_photos_start: false}
+      } 
+      case types.LOAD_INFO_LIKES_START: {
+         return {...state, load_info_likes_start: true, load_info_likes_end: false }
+      }
+      case types.LOAD_INFO_LIKES_END: {
+         return {...state, load_info_likes_end: true, load_info_likes_start: false }
+      }
        case types.ALL_PHOTOS: {
             return {...state, count: action.photos.count, items: action.photos.items }
        }
        case types.DEFAULT_STATE_INSPECT: {
-          console.log("clear")
           return {}
        }
       

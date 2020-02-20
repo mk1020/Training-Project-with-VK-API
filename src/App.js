@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import styles from "./App.module.css";
 import {
   loadFriends,
-  searchFriendThunk,
+  searchFriend,
   getPhotos,
+  getLikes,
   defaultStateInspect,
   default_liked_people
 } from "./redux/actions/actions";
@@ -35,9 +36,10 @@ const App = props => {
   const {
     friends,
     loadFriends,
-    searchFriendThunk,
+    searchFriend,
     likedPeople,
     getPhotos,
+    getLikes,
     count_photos,
     photos,
     defaultStateInspect,
@@ -51,13 +53,14 @@ const App = props => {
   const [selectedFilter, changeSelectedFilter] = useState(-1);
   const [count_likes, changeCount_likes] = useState(-1);
   const [selectedPhotos, changeSelectedPhotos] = useState({});
+  const [clickAllFriends, changeClickAllFriends] = useState(false);
   const [
     selectedPhotosWithoutFalse,
     changeSelectedPhotosWithoutFalse
   ] = useState({});
   const user_id = "43463557";
   useEffect(() => {
-    getPhotos(selectedFriend, false);
+    selectedFriend && getPhotos(selectedFriend);
   }, [selectedFriend]);
 
   /*  useEffect(() => {
@@ -98,13 +101,7 @@ const App = props => {
     //  console.log("---->>>>>", IdImgWithoutFalse)
   }, [selectedPhotos]);
 
-  console.log(
-    "likedPeople",
-    likedPeople,
-    "selectedPhotosWithoutFalse",
-    selectedPhotosWithoutFalse
-  );
-
+  console.log("clicl all friends", clickAllFriends);
   return (
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
@@ -113,8 +110,12 @@ const App = props => {
           <img className={styles.img_loading_friends} src={img_loading} />
         ) : null}
 
-        {inspectState.photos_loading ? (
+        {inspectState.load_photos_start ? (
           <img className={styles.img_loading_photos} src={img_loading} />
+        ) : null}
+
+        {inspectState.load_info_likes_start ? (
+          <img className={styles.img_loading_info_likes} src={img_loading} />
         ) : null}
         <div className={styles.App}>
           <input
@@ -124,7 +125,7 @@ const App = props => {
           />
           <button
             onClick={() => {
-              searchFriendThunk(valueTextInput, user_id);
+              searchFriend(valueTextInput, user_id);
               setValueTextInput("");
             }}
             className={styles.button_search}
@@ -132,21 +133,22 @@ const App = props => {
             Search
           </button>
           <div className={styles.block_friends}>
-            <button>All Friends</button>
-            {friends &&
-              friends.map((el, index) => (
-                <Friend
-                  onClick={() => {
-                    defaultStateInspect();
-                    changeSelectedPhotos({});
-                    changeSelectedFilter(-1); // почему, когда меняю SelectedFilter, не срабатывает useEffect
-                    changeCount_likes(-1);
-                    changeSelectedFriend(friends[index].id);
-                  }}
-                  key={`fln_${index}`}
-                  friend={friends[index]}
-                />
-              ))}
+            <button onClick={() => loadFriends()}>All Friends</button>
+            {friends 
+              ? friends.map((el, index) => (
+                  <Friend
+                    onClick={() => {
+                      defaultStateInspect();
+                      changeSelectedPhotos({});
+                      changeSelectedFilter(-1); // почему, когда меняю SelectedFilter, не срабатывает useEffect
+                      changeCount_likes(-1);
+                      changeSelectedFriend(friends[index].id);
+                    }}
+                    key={`fln_${index}`}
+                    friend={friends[index]}
+                  />
+                ))
+              : null}
           </div>
         </div>
         {selectedFriend !== 0 ? (
@@ -252,12 +254,12 @@ const App = props => {
                   />
                 ))}
             </div>
-
+               <button onClick={()=> getLikes(selectedFriend, true)} className={styles.button_all_photos}>Select All Photos</button>
             {Object.keys(selectedPhotos).length !== 0 ? (
               <button
                 className={styles.button_enter}
                 onClick={() =>
-                  getPhotos(selectedFriend, selectedPhotosWithoutFalse)
+                  getLikes(selectedFriend, selectedPhotosWithoutFalse)
                 }
               >
                 Enter
@@ -281,8 +283,9 @@ export default connect(
   }),
   {
     loadFriends,
-    searchFriendThunk,
+    searchFriend,
     getPhotos,
+    getLikes,
     defaultStateInspect,
     default_liked_people
   }
