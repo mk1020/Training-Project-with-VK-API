@@ -79,7 +79,7 @@ export const searchFriend = (search_line, user_id) => dispatch =>
   }
 ); */
 
-export const getPhotos = (user_id) => dispatch => {
+export const getPhotos = user_id => dispatch => {
   //получаем id фоток
   dispatch({ type: LOAD_PHOTOS_START });
   api.photosGetAll(user_id).then(async dataPhotos => {
@@ -88,56 +88,43 @@ export const getPhotos = (user_id) => dispatch => {
   });
 };
 
-export const getLikes = (user_id, IdImg = false) => dispatch => {
+export const getLikes = (user_id, IdImg) => dispatch => {
   //получаем id фоток
   api.photosGetAll(user_id).then(
     async dataPhotos => {
+      let IdImages = null;
       await dispatch(allPhotos(dataPhotos));
-      if (IdImg === true) {
-        debugger;
-        IdImg = dataPhotos.items;
-      }
+      if (IdImg === "all") {
+        IdImages = dataPhotos.items;
+      } else IdImages = IdImg;
       dispatch({ type: LOAD_INFO_LIKES_START });
       const forWithSleep = async () => {
         // массив id фоток [123,125, 543 и тд]
-        for (const el in IdImg) {
-          // получаем массив id пользователей, которые лайкнули
-          api.likesGetList(user_id, el).then(
-            data => {
-              let IdLikedPeople = "";
-              data &&
-                data.items.forEach(el => {
-                  // в ответе объект, в котором массив id людей, которые лайкнули
-                  IdLikedPeople === "" //для ускорения, а может и не только, берём все id из массива
-                    ? (IdLikedPeople = IdLikedPeople + el) //и кидаем их в строку через запятую, а потом делаем запрос
-                    : (IdLikedPeople = IdLikedPeople + "," + el); //в который кинем эту строку idшников и он мнесто них вернет массив имен и фамилий
+        for (const el in IdImages) {
+          api
+            .likesGetList(user_id, IdImg === "all" ? IdImages[el].id : el)
+            .then(
+              async data => { 
+                // получили массив объектов пользователей, которые лайкнули
+               // debugger;
+
+                await dispatch(
+                  likedPeople(
+                    IdImg === "all" ? IdImages[el].id.toString() : el,
+                    data.items
+                  )
+                );
+                await dispatch({
+                  type: LIKED_PEOPLE_UP,
+                  IdImg: IdImages
                 });
-
-              api.usersGet(IdLikedPeople).then(
-                //массив объектов, имена и фамилии получившийся из списка id пользователей
-
-                async data => {
-                  await dispatch(
-                    likedPeople(typeof el == "string" ? el : el.id, data)
-                  );
-
-                  await dispatch({
-                    type: LIKED_PEOPLE_UP,
-                    IdImg
-                  });
-                },
-                error => {
-                  console.log(error.error);
-                  alert("Произошла ошибка! Подробности в консоле.");
-                }
-              );
-            },
-            error => {
-              console.log(error.error);
-              alert("Произошла ошибка! Подробности в консоле.");
-            }
-          );
-          await sleep(1500);
+              },
+              error => {
+                console.log(error.error);
+                alert("Произошла ошибка! Подробности в консоле.");
+              }
+            );
+          await sleep(1200);
         }
       };
       await forWithSleep();

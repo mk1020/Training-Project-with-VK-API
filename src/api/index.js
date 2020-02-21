@@ -38,7 +38,7 @@ export const photosGetAll = user_id =>
         access_token: api_token
       },
       data =>
-        data.error ? reject(data) : resolve(data.response)
+        data.error ?  reject(data)  : resolve(data.response)
     )
   );
 
@@ -50,13 +50,14 @@ export const likesGetList = (user_id, el) =>
         // получаем массив id пользователей, которые лайкнули
         type: "photo",
         owner_id: user_id,
-        item_id: typeof el == "string" ? el : el.id,
+        item_id: el,
         count: 1000,
         v: 5.103,
+        extended: 1,
         access_token: api_token
       },
       data =>
-        data.error ? reject(data) : resolve(data.response)
+        data.error ? reject(data): resolve(data.response)
     )
   );
 

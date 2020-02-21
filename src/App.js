@@ -58,6 +58,7 @@ const App = props => {
     selectedPhotosWithoutFalse,
     changeSelectedPhotosWithoutFalse
   ] = useState({});
+  const [selectAllPhotos, changeSelectAllPhoto] = useState(false);
   const user_id = "43463557";
   useEffect(() => {
     selectedFriend && getPhotos(selectedFriend);
@@ -71,7 +72,6 @@ const App = props => {
     if (likedPeople) {
       let count = 0;
       for (let key in likedPeople) {
-        //   debugger;
         selectedFilter === "man-women" || selectedFilter === "man-women-change"
           ? (count += likedPeople[key].length)
           : likedPeople[key].forEach(el => {
@@ -101,7 +101,6 @@ const App = props => {
     //  console.log("---->>>>>", IdImgWithoutFalse)
   }, [selectedPhotos]);
 
-  console.log("clicl all friends", clickAllFriends);
   return (
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
@@ -134,7 +133,7 @@ const App = props => {
           </button>
           <div className={styles.block_friends}>
             <button onClick={() => loadFriends()}>All Friends</button>
-            {friends 
+            {friends
               ? friends.map((el, index) => (
                   <Friend
                     onClick={() => {
@@ -254,17 +253,32 @@ const App = props => {
                   />
                 ))}
             </div>
-               <button onClick={()=> getLikes(selectedFriend, true)} className={styles.button_all_photos}>Select All Photos</button>
-            {Object.keys(selectedPhotos).length !== 0 ? (
+            <div>
               <button
-                className={styles.button_enter}
-                onClick={() =>
-                  getLikes(selectedFriend, selectedPhotosWithoutFalse)
-                }
+                onClick={() => {
+                  changeSelectAllPhoto(!selectAllPhotos);
+                  let selectedPhotosCopy = {};
+                  photos.forEach(el => (selectedPhotosCopy[el.id] = true));
+                  changeSelectedPhotos(selectedPhotosCopy);
+                  //if (selectAllPhotos === false) changeSelectedPhotos({});
+                }}
+                className={styles.button_all_photos}
               >
-                Enter
+                Select All Photos
               </button>
-            ) : null}
+              {Object.keys(selectedPhotos).length !== 0 ? (
+                <button
+                  className={styles.button_enter}
+                  onClick={() => {
+                    if (selectAllPhotos) {
+                      getLikes(selectedFriend, "all");
+                    } else getLikes(selectedFriend, selectedPhotosWithoutFalse);
+                  }}
+                >
+                  Enter
+                </button>
+              ) : null}
+            </div>
           </div>
         ) : null}
       </div>
