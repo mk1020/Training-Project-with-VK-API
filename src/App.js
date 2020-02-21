@@ -1,3 +1,4 @@
+//todo: когда выбираешь фотографию а потом нажимаешь на фильтр, а потом на enter,  то после зарузки появляется смайлик без counta
 import React, { useState, useEffect } from "react";
 import styles from "./App.module.css";
 import {
@@ -79,23 +80,42 @@ const App = props => {
           selectedFilter === "man-women-change"
         ) {
           count += likedPeople[key].length;
-          changeListLikePeople(likedPeople[key].map(people => 
+          changeListLikePeople(
+            likedPeople[key].map(people => (
               <li>
                 {people.first_name} {people.last_name}
               </li>
             ))
-        } else 
-        likedPeople[key].forEach(el => {
-          switch (selectedFilter) {
-            case "man" || "man-change":
-              if (el.sex === 2) count++;
-              break;
-            case "women" || "women-change":
-              if (el.sex === 1) count++;
-              break;
-          }
-        });
+          );
+        } else
+          changeListLikePeople(
+            likedPeople[key].map(people => {
+              switch (selectedFilter) {
+                case "man" || "man-change": {
+                  if (people.sex === 2) {
+                    count++;
+                    return (
+                      <li>
+                        {people.first_name} {people.last_name}
+                      </li>
+                    );
+                  }
+                }
+                case "women" || "women-change": {
+                  if (people.sex === 1) {
+                    count++;
+                    return (
+                      <li>
+                        {people.first_name} {people.last_name}
+                      </li>
+                    );
+                  }
+                }
+              }
+            })
+          );
       }
+      console.log("listLike people", listLikePeople);
       changeCount_likes(count);
     }
   }, [selectedFilter]);
@@ -313,7 +333,7 @@ const App = props => {
             </div>
             {clickListLikeP && inspectState.load_info_likes_end && (
               <div className={styles.list_liked_people}>
-                <ul></ul>
+                <ul>{listLikePeople}</ul>
               </div>
             )}
           </div>
