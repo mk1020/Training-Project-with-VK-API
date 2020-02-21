@@ -115,7 +115,7 @@
   height: 263px;
   border: 2px ridge #e9e9e9;
 }
-.button_show_photos {
+/* .button_show_photos {
   font-family: "Prompt", sans-serif;
   font-weight: 400;
   font-size: 14px;
@@ -124,11 +124,11 @@
   margin-bottom: 3px;
   border-radius: 10px;
   width: 55px;
-}
+} */
 
-.button_show_photos:focus {
+/* .button_show_photos:focus {
   outline: none;
-}
+} */
 
 
 .imgFriendNoOpacity {
@@ -141,7 +141,7 @@
   width: 130px;
   height: 130px;
   margin-bottom: 3px;
-  opacity: 60%;
+  opacity: 35%;
 }
 
 .block_photos img:nth-child(1n),
@@ -226,7 +226,6 @@
 .button_all_photos_and_enter{
 display: flex;
 flex-direction: column;
-align-items: center;
 }
 
 .button_enter{
@@ -236,12 +235,27 @@ align-items: center;
   padding: 2px 4px 2px 4px;
   background-color: #e9e9e9;
   border-radius: 10px;
-  width: 60px;
+  width: auto;
   height: 30px;
+  margin: 2px 0px;
 }
 
 
 .button_enter:focus{
+  outline: none;
+}
+.button_list_liked_people{
+  font-family: "Prompt", sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  padding: 2px 4px 2px 4px;
+  background-color: #e9e9e9;
+  border-radius: 10px;
+  width: auto;
+  height: 30px;
+}
+
+.button_list_liked_people:focus{
   outline: none;
 }
 
@@ -258,4 +272,22 @@ align-items: center;
 
 .button_all_photos:focus{
   outline: none;
+}
+
+.wrapper_wrapper_rightArea{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.list_liked_people{
+  margin-top: 20px;
+  margin-left: 20px;
+  overflow: auto;
+  width: 250px;
+  height: 350px;
+}
+
+.list_liked_people ul {
+  list-style-type: decimal;
+
 }

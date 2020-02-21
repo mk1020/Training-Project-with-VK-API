@@ -143,7 +143,7 @@ export const getLikes = (user_id, IdImg) => dispatch => {
                 alert("Произошла ошибка! Подробности в консоле.");
               }
             );
-          await sleep(1500);
+          await sleep(1100);
         }
       };
       await forWithSleep();
