@@ -253,7 +253,7 @@ const App = props => {
                   />
                 ))}
             </div>
-            <div>
+            <div className={styles.button_all_photos_and_enter}>
               <button
                 onClick={() => {
                   changeSelectAllPhoto(!selectAllPhotos);

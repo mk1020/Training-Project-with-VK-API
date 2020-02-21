@@ -14,6 +14,7 @@ export const inspectReducer = (state = {}, action) => {
       for (const key in state.likedPeople)
         if (Object.keys(IdImgCopy).indexOf(key) !== -1)
           likedPeopleCopy[key] = state.likedPeople[key];
+      
       return { ...state, likedPeople: likedPeopleCopy };
     }
     case types.LIKED_PEOPLE: {

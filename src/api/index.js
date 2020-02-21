@@ -53,7 +53,6 @@ export const likesGetList = (user_id, el) =>
         item_id: el,
         count: 1000,
         v: 5.103,
-        extended: 1,
         access_token: api_token
       },
       data =>

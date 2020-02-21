@@ -101,30 +101,49 @@ export const getLikes = (user_id, IdImg) => dispatch => {
       const forWithSleep = async () => {
         // массив id фоток [123,125, 543 и тд]
         for (const el in IdImages) {
+          // получаем массив id пользователей, которые лайкнули
           api
             .likesGetList(user_id, IdImg === "all" ? IdImages[el].id : el)
             .then(
-              async data => { 
-                // получили массив объектов пользователей, которые лайкнули
-               // debugger;
+              data => {
+                let IdLikedPeople = "";
 
-                await dispatch(
-                  likedPeople(
-                    IdImg === "all" ? IdImages[el].id.toString() : el,
-                    data.items
-                  )
-                );
-                await dispatch({
-                  type: LIKED_PEOPLE_UP,
-                  IdImg: IdImages
+                data.items.forEach(el => {
+                  // в ответе объект, в котором массив id людей, которые лайкнули
+                  IdLikedPeople === "" //для ускорения, а может и не только, берём все id из массива
+                    ? (IdLikedPeople = IdLikedPeople + el) //и кидаем их в строку через запятую, а потом делаем запрос
+                    : (IdLikedPeople = IdLikedPeople + "," + el); //в который кинем эту строку idшников и он мнесто них вернет массив имен и фамилий
                 });
+
+                api.usersGet(IdLikedPeople).then(
+                  //массив объектов, имена и фамилии получившийся из списка id пользователей
+
+                  async data => {
+                    await dispatch(
+                      likedPeople(
+                        IdImg === "all" ? IdImages[el].id.toString() : el,
+                        data
+                      )
+                    );
+                    console.log("--__---->>>", IdImg);
+                   // debugger;
+                    await dispatch({
+                      type: LIKED_PEOPLE_UP,
+                     IdImg: IdImages
+                    });
+                  },
+                  error => {
+                    console.log(error.error);
+                    alert("Произошла ошибка! Подробности в консоле.");
+                  }
+                );
               },
               error => {
                 console.log(error.error);
                 alert("Произошла ошибка! Подробности в консоле.");
               }
             );
-          await sleep(1200);
+          await sleep(1500);
         }
       };
       await forWithSleep();
