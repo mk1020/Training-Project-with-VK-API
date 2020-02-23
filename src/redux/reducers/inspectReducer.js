@@ -5,6 +5,7 @@ export const inspectReducer = (state = {}, action) => {
     case types.LIKED_PEOPLE_UP: {
       let likedPeopleCopy = {};
       let IdImgCopy = {};
+      let likedPeopleNoRepeat={};
       Array.isArray(action.IdImg)
         ? action.IdImg.forEach(
             (el, ind) => (IdImgCopy[action.IdImg[ind].id] = true)
@@ -20,8 +21,8 @@ export const inspectReducer = (state = {}, action) => {
     case types.LIKED_PEOPLE: {
       let obj = {};
       obj[action.idPhoto] = action.arrayLikedPeople; //объект: id: [массив obj]
-      // console.log("state", state)
-      console.log("obj", obj);
+         for (const key in state.likedPeople) 
+              likedPeople[key]
       return { ...state, likedPeople: { ...state.likedPeople, ...obj } };
     }
     case types.LOAD_PHOTOS_START: {

@@ -74,48 +74,54 @@ const App = props => {
   useEffect(() => {
     if (likedPeople) {
       let count = 0;
+      changeListLikePeople([])
+      let list_liked_people_copy = [];
       for (let key in likedPeople) {
+        //debugger;
         if (
           selectedFilter === "man-women" ||
           selectedFilter === "man-women-change"
         ) {
           count += likedPeople[key].length;
-          changeListLikePeople(
-            likedPeople[key].map(people => (
-              <li>
+          list_liked_people_copy.push(
+            ...likedPeople[key].map((people, index) => (
+              <li key={people.id+ index}>
                 {people.first_name} {people.last_name}
               </li>
             ))
           );
         } else
-          changeListLikePeople(
-            likedPeople[key].map(people => {
-              switch (selectedFilter) {
-                case "man" || "man-change": {
-                  if (people.sex === 2) {
-                    count++;
-                    return (
-                      <li>
-                        {people.first_name} {people.last_name}
-                      </li>
-                    );
-                  }
+          likedPeople[key].forEach((people, index) => {
+            switch (selectedFilter) {
+              case "man" || "man-change": {
+                if (people.sex === 2) {
+                  count++;
+                  list_liked_people_copy.push(
+                    <li key={people.id  + index}>
+                      {people.first_name} {people.last_name}
+                    </li>
+                  );
                 }
-                case "women" || "women-change": {
-                  if (people.sex === 1) {
-                    count++;
-                    return (
-                      <li>
-                        {people.first_name} {people.last_name}
-                      </li>
-                    );
-                  }
-                }
+                break;
               }
-            })
-          );
+              case "women" || "women-change": {
+                if (people.sex === 1) {
+                  count++;
+                  list_liked_people_copy.push(
+                    <li key={people.id + index}>
+                      {people.first_name} {people.last_name}
+                    </li>
+                  );
+                }
+                break;
+              }
+            }
+          });
+
+         // debugger
       }
-      console.log("listLike people", listLikePeople);
+     changeListLikePeople(list_liked_people_copy); 
+      console.log("render ", selectedFilter)
       changeCount_likes(count);
     }
   }, [selectedFilter]);
@@ -129,9 +135,9 @@ const App = props => {
     for (const key in selectedPhotos)
       if (selectedPhotos[key]) IdImgWithoutFalse[key] = selectedPhotos[key];
     changeSelectedPhotosWithoutFalse(IdImgWithoutFalse);
-    //  console.log("---->>>>>", IdImgWithoutFalse)
-  }, [selectedPhotos]);
 
+    console.log("list like people", listLikePeople)
+  }, [selectedPhotos]);
   return (
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
