@@ -46,7 +46,8 @@ const App = props => {
     defaultStateInspect,
     friendsState,
     inspectState,
-    default_liked_people
+    default_liked_people,
+    likedPeopleCopy
   } = props;
 
   const [valueTextInput, setValueTextInput] = useState("");
@@ -73,6 +74,33 @@ const App = props => {
 
   useEffect(() => {
     if (likedPeople) {
+     let likedPeopleNoRepeatArray = [];
+      for (const key in likedPeople)
+      likedPeopleNoRepeatArray = [
+        ...likedPeopleNoRepeatArray,
+        ...likedPeople[key]
+      ];
+
+      
+    for (let i = 0; i < likedPeopleNoRepeatArray.length; i++)
+      for (let j = 0; j < likedPeopleNoRepeatArray.length; j++) {
+        if (
+          i !== j &&
+          JSON.stringify(likedPeopleNoRepeatArray[i]) ===
+            JSON.stringify(likedPeopleNoRepeatArray[j])
+        ) { 
+          likedPeopleNoRepeatArray.splice(j, 1);
+          i--;
+          j--;
+          //там выходит 137 уникальных слов , а должно быть 136, это значит что одно слово из этого списка там должно повторяться, найти его и понять почему оно не удалилось 
+        }
+        
+      }
+    console.log("likedPeopleNoRepeatArray",likedPeopleNoRepeatArray)
+
+
+
+
       let count = 0;
       changeListLikePeople([])
       let list_liked_people_copy = [];
@@ -121,7 +149,6 @@ const App = props => {
          // debugger
       }
      changeListLikePeople(list_liked_people_copy); 
-      console.log("render ", selectedFilter)
       changeCount_likes(count);
     }
   }, [selectedFilter]);
@@ -136,8 +163,9 @@ const App = props => {
       if (selectedPhotos[key]) IdImgWithoutFalse[key] = selectedPhotos[key];
     changeSelectedPhotosWithoutFalse(IdImgWithoutFalse);
 
-    console.log("list like people", listLikePeople)
   }, [selectedPhotos]);
+  
+
   return (
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
@@ -356,7 +384,8 @@ export default connect(
     likedPeople: state.inspectReducer.likedPeople,
     count_photos: state.inspectReducer.count,
     photos: state.inspectReducer.items,
-    inspectState: state.inspectReducer
+    inspectState: state.inspectReducer,
+    likedPeopleCopy: state.inspectReducer.likedPeopleCopy
   }),
   {
     loadFriends,
