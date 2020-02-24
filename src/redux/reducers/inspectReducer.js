@@ -15,31 +15,28 @@ export const inspectReducer = (state = {}, action) => {
         if (Object.keys(IdImgCopy).indexOf(key) !== -1)
           likedPeopleCopy[key] = state.likedPeople[key];
 
-
-        
-
       return { ...state, likedPeople: likedPeopleCopy };
     }
     case types.LIKED_PEOPLE: {
       let obj = {};
-      let likedPeopleNoRepeat = {};
-      let likedPeopleNoRepeatArray = [];
-
       obj[action.idPhoto] = action.arrayLikedPeople; //объект: id: [массив obj]
-      
-              //   console.log("array1++",likedPeopleNoRepeatArray)
+      return {
+        ...state,
+        likedPeople: { ...state.likedPeople, ...obj }
+      };
+    }
+    case types.IMGES_BY_PEOPLE: {
+      let imgesByPeople = {};
+      for (const photo in state.likedPeople)
+        state.likedPeople[photo].forEach(
+          people =>
+            (imgesByPeople[people.id] = {
+              ...imgesByPeople[people.id], first_name: people.first_name, last_name: people.last_name, sex: people.sex,
+              [photo]: ""
+            })
+        );
 
-      /* for (const key in state.likedPeople)
-        state.likedPeople[key].forEach(el => {
-          let count = 0;
-            for (let i=0; i< likedPeopleNoRepeatArray.length; i++)  {
-            if (JSON.stringify(el) === JSON.stringify(likedPeopleNoRepeatArray[i]))  {count++; }
-            if (count > 1) {likedPeopleNoRepeatArray.splice(i, 1); i--}
-          }
-        }); */
-
-
-      return { ...state, likedPeople: { ...state.likedPeople, ...obj }, likedPeopleCopy: likedPeopleNoRepeatArray };
+      return { ...state, imgesByPeople: imgesByPeople };
     }
     case types.LOAD_PHOTOS_START: {
       return { ...state, load_photos_start: true, load_photos_end: false };

@@ -12,6 +12,8 @@ export const DEFAULT_LIKED_PEOPLE = "DEFAULT_LIKED_PEOPLE";
 export const LIKED_PEOPLE_UP = "LIKED_PEOPLE_UP";
 export const LOAD_INFO_LIKES_START = "LOAD_INFO_LIKES_START";
 export const LOAD_INFO_LIKES_END = "LOAD_INFO_LIKES_END";
+export const IMGES_BY_PEOPLE = "IMGES_BY_PEOPLE";
+
 
 export const areaFriend = arrayFriends => ({
   type: AREA_FRIENDS,
@@ -118,19 +120,18 @@ export const getLikes = (user_id, IdImg) => dispatch => {
                 api.usersGet(IdLikedPeople).then(
                   //массив объектов, имена и фамилии получившийся из списка id пользователей
 
-                  async data => {
-                    await dispatch(
+                   data => {
+                     dispatch(
                       likedPeople(
                         IdImg === "all" ? IdImages[el].id.toString() : el,
                         data
                       )
                     );
-                    console.log("--__---->>>", IdImg);
-                   // debugger;
-                    await dispatch({
+                     dispatch({
                       type: LIKED_PEOPLE_UP,
                      IdImg: IdImages
                     });
+                    dispatch({type: IMGES_BY_PEOPLE })
                   },
                   error => {
                     console.log(error.error);

@@ -9,6 +9,7 @@ import {
   defaultStateInspect,
   default_liked_people
 } from "./redux/actions/actions";
+import { uniqBy, isEqual } from "lodash";
 import { connect } from "react-redux";
 import img_man_women from "./img/man-women.png";
 import img_man from "./img/man.png";
@@ -47,7 +48,8 @@ const App = props => {
     friendsState,
     inspectState,
     default_liked_people,
-    likedPeopleCopy
+    likedPeopleCopy,
+    imgesByPeople
   } = props;
 
   const [valueTextInput, setValueTextInput] = useState("");
@@ -74,81 +76,62 @@ const App = props => {
 
   useEffect(() => {
     if (likedPeople) {
-     let likedPeopleNoRepeatArray = [];
-      for (const key in likedPeople)
-      likedPeopleNoRepeatArray = [
-        ...likedPeopleNoRepeatArray,
-        ...likedPeople[key]
-      ];
-
-      
-    for (let i = 0; i < likedPeopleNoRepeatArray.length; i++)
-      for (let j = 0; j < likedPeopleNoRepeatArray.length; j++) {
-        if (
-          i !== j &&
-          JSON.stringify(likedPeopleNoRepeatArray[i]) ===
-            JSON.stringify(likedPeopleNoRepeatArray[j])
-        ) { 
-          likedPeopleNoRepeatArray.splice(j, 1);
-          i--;
-          j--;
-          //там выходит 137 уникальных слов , а должно быть 136, это значит что одно слово из этого списка там должно повторяться, найти его и понять почему оно не удалилось 
-        }
-        
-      }
-    console.log("likedPeopleNoRepeatArray",likedPeopleNoRepeatArray)
-
-
-
-
       let count = 0;
-      changeListLikePeople([])
       let list_liked_people_copy = [];
-      for (let key in likedPeople) {
-        //debugger;
-        if (
-          selectedFilter === "man-women" ||
-          selectedFilter === "man-women-change"
-        ) {
-          count += likedPeople[key].length;
-          list_liked_people_copy.push(
-            ...likedPeople[key].map((people, index) => (
-              <li key={people.id+ index}>
-                {people.first_name} {people.last_name}
-              </li>
-            ))
-          );
-        } else
-          likedPeople[key].forEach((people, index) => {
-            switch (selectedFilter) {
-              case "man" || "man-change": {
-                if (people.sex === 2) {
-                  count++;
-                  list_liked_people_copy.push(
-                    <li key={people.id  + index}>
-                      {people.first_name} {people.last_name}
-                    </li>
-                  );
-                }
-                break;
-              }
-              case "women" || "women-change": {
-                if (people.sex === 1) {
-                  count++;
-                  list_liked_people_copy.push(
-                    <li key={people.id + index}>
-                      {people.first_name} {people.last_name}
-                    </li>
-                  );
-                }
-                break;
-              }
-            }
-          });
+          
+      if (
+        selectedFilter === "man-women" ||
+        selectedFilter === "man-women-change"
+      ) {
+console.log("konsole log",Object.keys(imgesByPeople).length)
+          for (const key in likedPeople) likedPeople[key].forEach((el)=> console.log(el.first_name+el.last_name))
+        for (const key in likedPeople) count += likedPeople[key].length;
+        list_liked_people_copy.push(
+          ...Object.keys(imgesByPeople).map((people, index) => (
+            <li key={people.id + index}>
+              {imgesByPeople[people].first_name} {imgesByPeople[people].last_name}
+            </li>
+          ))
+        );
+      } else
+        switch (selectedFilter) {
+          case "man" || "man-change": {
+            for (const key in likedPeople)
+              likedPeople[key].forEach(people => {
+                if (people.sex === 2) count++;
+              });
+            Object.keys(imgesByPeople).forEach((people, index) => {
+              if (imgesByPeople[people].sex === 2)
+                list_liked_people_copy.push(
+                  <li key={imgesByPeople[people].id + index}>
+                    {imgesByPeople[people].first_name} {imgesByPeople[people].last_name}
+                  </li>
+                );
+            });
+            break;
+          }
+          case "women" || "women-change": {
+            for (const key in likedPeople)
+              likedPeople[key].forEach(people => {
+                if (people.sex === 1) count++;
+              });
 
-         // debugger
-      }
-     changeListLikePeople(list_liked_people_copy); 
+            Object.keys(imgesByPeople).forEach((people, index) => {
+              if (imgesByPeople[people].sex === 1)
+                list_liked_people_copy.push(
+                  <li key={imgesByPeople[people].id + index}>
+                    {imgesByPeople[people].first_name} {imgesByPeople[people].last_name}
+                  </li>
+                );
+            });
+
+            break;
+          }
+          default:
+            break;
+        }
+
+      changeListLikePeople(list_liked_people_copy);
       changeCount_likes(count);
     }
   }, [selectedFilter]);
@@ -162,9 +145,7 @@ const App = props => {
     for (const key in selectedPhotos)
       if (selectedPhotos[key]) IdImgWithoutFalse[key] = selectedPhotos[key];
     changeSelectedPhotosWithoutFalse(IdImgWithoutFalse);
-
   }, [selectedPhotos]);
-  
 
   return (
     <div className={styles.App_wrapper}>
@@ -385,7 +366,8 @@ export default connect(
     count_photos: state.inspectReducer.count,
     photos: state.inspectReducer.items,
     inspectState: state.inspectReducer,
-    likedPeopleCopy: state.inspectReducer.likedPeopleCopy
+    likedPeopleCopy: state.inspectReducer.likedPeopleCopy,
+    imgesByPeople: state.inspectReducer.imgesByPeople
   }),
   {
     loadFriends,
