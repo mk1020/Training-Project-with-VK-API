@@ -1,3 +1,4 @@
+//todo: когда выбираешь фотографию а потом нажимаешь на фильтр, а потом на enter,  то после зарузки появляется смайлик без counta
 import React, { useState, useEffect } from "react";
 import styles from "./App.module.css";
 import {
@@ -11,7 +12,7 @@ import img_man_women from "./img/man-women.png";
 import img_man from "./img/man.png";
 import img_women from "./img/women.png";
 import img_smile from "./img/smile-3173976_640.png";
-import { defaultStateInspect } from "./redux/actions/actions";
+import img_loading from "./img/loading.svg";
 
 const Friend = props => {
   return (
@@ -32,66 +33,138 @@ const App = props => {
   );
 
   const {
-    friend,
-    getFriendsThunk,
-    searchFriendThunk,
+    friends,
+    loadFriends,
+    searchFriend,
     likedPeople,
-    getPhotosThunk,
+    getPhotos,
+    getLikes,
     count_photos,
     photos,
     defaultStateInspect, loadFriends
   } = props;
+
   const [valueTextInput, setValueTextInput] = useState("");
-  const [onClickShow, setOnClickShow] = useState(false);
-  const [selectedPhotos, changeSelectedPhotos] = useState({});
   const [selectedFriend, changeSelectedFriend] = useState(0);
   const [selectedFilter, changeSelectedFilter] = useState(-1);
   const [count_likes, changeCount_likes] = useState(-1);
-
-
-  
+  const [selectedPhotos, changeSelectedPhotos] = useState({});
+  const [clickAllFriends, changeClickAllFriends] = useState(false);
+  const [
+    selectedPhotosWithoutFalse,
+    changeSelectedPhotosWithoutFalse
+  ] = useState({});
+  const [selectAllPhotos, changeSelectAllPhoto] = useState(false);
+  const [clickListLikeP, changeClickListLikeP] = useState(false);
+  const [listLikePeople, changeListLikePeople] = useState([]);
+  const user_id = "43463557";
   useEffect(() => {
-    getPhotosThunk(selectedFriend, false);
+    selectedFriend && getPhotos(selectedFriend);
   }, [selectedFriend]);
 
   /*  useEffect(() => {
-    getPhotosThunk(selectedFriend, selectedPhotos);
+    getPhotos(selectedFriend, selectedPhotos);
   }, [selectedFilter]); */
 
   useEffect(() => {
-    console.log("selected Photos ", selectedPhotos);
-    console.log("liked people ", likedPeople);
     if (likedPeople) {
       let count = 0;
-      for (let key in likedPeople) {
-        //   debugger;
-        selectedFilter === "man-women" || selectedFilter === "man-women-change"
-          ? (count += likedPeople[key].length)
-          : likedPeople[key].forEach(el => {
-              switch (selectedFilter) {
-                case "man" || "man-change":
-                  if (el.sex === 2) count++;
-                  break;
-                case "women" || "women-change":
-                  if (el.sex === 1) count++;
-                  break;
-              }
+      let list_liked_people_copy = [];
+
+      if (
+        selectedFilter === "man-women" ||
+        selectedFilter === "man-women-change"
+      ) {
+        console.log("konsole log", Object.keys(imgesByPeople).length);
+        for (const key in likedPeople)
+          likedPeople[key].forEach(el =>
+            console.log(el.first_name + el.last_name)
+          );
+        for (const key in likedPeople) count += likedPeople[key].length;
+        list_liked_people_copy.push(
+          ...Object.keys(imgesByPeople).map((people, index) => (
+            <li key={people.id + index}>
+              {imgesByPeople[people].first_name}{" "}
+              {imgesByPeople[people].last_name}
+            </li>
+          ))
+        );
+      } else
+        switch (selectedFilter) {
+          case "man" || "man-change": {
+            for (const key in likedPeople)
+              likedPeople[key].forEach(people => {
+                if (people.sex === 2) count++;
+              });
+            Object.keys(imgesByPeople).forEach((people, index) => {
+              if (imgesByPeople[people].sex === 2)
+                list_liked_people_copy.push(
+                  <li key={imgesByPeople[people].id + index}>
+                    {imgesByPeople[people].first_name}{" "}
+                    {imgesByPeople[people].last_name}
+                  </li>
+                );
             });
-      }
+            break;
+          }
+          case "women" || "women-change": {
+            for (const key in likedPeople)
+              likedPeople[key].forEach(people => {
+                if (people.sex === 1) count++;
+              });
+
+            Object.keys(imgesByPeople).forEach((people, index) => {
+              if (imgesByPeople[people].sex === 1)
+                list_liked_people_copy.push(
+                  <li key={imgesByPeople[people].id + index}>
+                    {imgesByPeople[people].first_name}{" "}
+                    {imgesByPeople[people].last_name}
+                  </li>
+                );
+            });
+
+            break;
+          }
+          default:
+            break;
+        }
+
+      changeListLikePeople(list_liked_people_copy);
       changeCount_likes(count);
     }
   }, [selectedFilter]);
 
   useEffect(() => {
-    getFriendsThunk();
     loadFriends();
   }, []);
 
-  //todo перерэндэрить компонент когда likedPeople из redux меняется
+  useEffect(() => {
+    const IdImgWithoutFalse = {};
+    for (const key in selectedPhotos)
+      if (selectedPhotos[key]) IdImgWithoutFalse[key] = selectedPhotos[key];
+    changeSelectedPhotosWithoutFalse(IdImgWithoutFalse);
+    if (
+      Object.keys(IdImgWithoutFalse).length === 0 &&
+      Object.keys(selectedPhotos).length !== 0
+    ) { 
+      changeSelectedPhotos({});}
+  }, [selectedPhotos]);
+
   return (
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
       <div className={styles.app_block_action_wrapper}>
+        {friendsState.friends_loading ? (
+          <img className={styles.img_loading_friends} src={img_loading} />
+        ) : null}
+
+        {inspectState.load_photos_start ? (
+          <img className={styles.img_loading_photos} src={img_loading} />
+        ) : null}
+
+        {inspectState.load_info_likes_start ? (
+          <img className={styles.img_loading_info_likes} src={img_loading} />
+        ) : null}
         <div className={styles.App}>
           <input
             value={valueTextInput}
@@ -100,7 +173,7 @@ const App = props => {
           />
           <button
             onClick={() => {
-              searchFriendThunk(valueTextInput);
+              searchFriend(valueTextInput, user_id);
               setValueTextInput("");
             }}
             className={styles.button_search}
@@ -108,141 +181,113 @@ const App = props => {
             Search
           </button>
           <div className={styles.block_friends}>
-            <button>All Friends</button>
-            {friend.map((el, index) => (
-              <Friend
-                onClick={() => {
-                  defaultStateInspect();
-                  setOnClickShow(false);
-                  changeSelectedPhotos({});
-                  changeSelectedFilter(-1); // почему, когда меняю SelectedFilter, не срабатывает useEffect
-                  changeCount_likes(-1);
-                  changeSelectedFriend(friend[index].id);
-                }}
-                key={`fln_${index}`}
-                friend={friend[index]}
-              />
-            ))}
+            <button onClick={() => loadFriends()}>All Friends</button>
+            {friends
+              ? friends.map((el, index) => (
+                  <Friend
+                    onClick={() => {
+                      defaultStateInspect();
+                      changeSelectedPhotos({});
+                      changeSelectedFilter(-1);
+                      changeCount_likes(-1);
+                      changeSelectedFriend(friends[index].id);
+                    }}
+                    key={`fln_${index}`}
+                    friend={friends[index]}
+                  />
+                ))
+              : null}
           </div>
         </div>
         {selectedFriend !== 0 ? (
-          <div className={styles.wrapper_rightArea}>
-            <div className={styles.rightArea}>
-              <button className={styles.button_count_photos}>
-                Photos: {count_photos}
-              </button>
-              <button
-                onClick={() => setOnClickShow(!onClickShow)}
-                className={styles.button_show_photos}
-              >
-                Show
-              </button>
-              <h5 className={styles.h5}>who put a like?</h5>
-              <div className={styles.filter}>Filter:</div>
-              <div
-                onClick={() => {
-                  selectedFilter === "man-women"
-                    ? changeSelectedFilter("man-women-change")
-                    : changeSelectedFilter("man-women");
-                }}
-                className={
-                  likedPeople &&
-                  Object.keys(likedPeople).length ===
-                    Object.keys(selectedPhotos).length
-                    ? styles.wrapper_img_man_women
-                    : styles.wrapper_img_man_women_opacity
-                }
-              >
-                <img className={styles.img_man} src={img_man} alt="img-man" />
-                <img
-                  className={styles.img_women}
-                  src={img_women}
-                  alt="img-women"
-                />
+          <div className={styles.wrapper_wrapper_rightArea}>
+            <div className={styles.wrapper_rightArea}>
+              <div className={styles.rightArea}>
+                <button className={styles.button_count_photos}>
+                  Photos: {count_photos}
+                </button>
+                <h5 className={styles.h5}>who put a like?</h5>
+                <div className={styles.filter}>Filter:</div>
+                <div
+                  onClick={() => {
+                    if (inspectState.load_info_likes_end)
+                      selectedFilter === "man-women"
+                        ? changeSelectedFilter("man-women-change")
+                        : changeSelectedFilter("man-women");
+                  }}
+                  className={styles.wrapper_img_man_women}
+                >
+                  <img className={styles.img_man} src={img_man} alt="img-man" />
+                  <img
+                    className={styles.img_women}
+                    src={img_women}
+                    alt="img-women"
+                  />
+                  {(selectedFilter === "man-women" ||
+                    selectedFilter === "man-women-change") &&
+                  inspectState.load_info_likes_end ? (
+                    <img
+                      src={img_smile}
+                      className={styles.img_smile}
+                      alt="img-smile"
+                    />
+                  ) : null}
+                </div>
+                <div className={styles.wrapper_img_man}>
+                  <img
+                    onClick={() =>
+                      inspectState.load_info_likes_end &&
+                      selectedFilter === "man"
+                        ? changeSelectedFilter("man-change")
+                        : changeSelectedFilter("man")
+                    }
+                    className={styles.img_man}
+                    src={img_man}
+                    alt="img-man"
+                  />
+                  {(selectedFilter === "man" ||
+                    selectedFilter === "man-change") &&
+                  inspectState.load_info_likes_end ? (
+                    <img
+                      src={img_smile}
+                      className={styles.img_smile}
+                      alt="img-smile"
+                    />
+                  ) : null}
+                </div>
+                <div className={styles.wrapper_img_women}>
+                  <img
+                    onClick={() =>
+                      inspectState.load_info_likes_end &&
+                      selectedFilter === "women"
+                        ? changeSelectedFilter("women-change")
+                        : changeSelectedFilter("women")
+                    }
+                    className={styles.img_women}
+                    src={img_women}
+                    alt="img-women"
+                  />
+                  {(selectedFilter === "women" ||
+                    selectedFilter === "women-change") &&
+                  inspectState.load_info_likes_end ? (
+                    <img
+                      src={img_smile}
+                      className={styles.img_smile}
+                      alt="img-smile"
+                    />
+                  ) : null}
+                </div>
                 {(selectedFilter === "man-women" ||
-                  selectedFilter === "man-women-change") &&
-                likedPeople &&
-                Object.keys(likedPeople).length ===
-                  Object.keys(selectedPhotos).length ? (
-                  <img
-                    src={img_smile}
-                    className={styles.img_smile}
-                    alt="img-smile"
-                  />
+                  selectedFilter === "man" ||
+                  selectedFilter === "women") &&
+                count_likes !== -1 ? (
+                  <div className={styles.count_likes}>
+                    {" "}
+                    Count: {count_likes}
+                  </div>
                 ) : null}
               </div>
-              <div
-                className={
-                  likedPeople &&
-                  Object.keys(likedPeople).length ===
-                    Object.keys(selectedPhotos).length
-                    ? styles.wrapper_img_man
-                    : styles.wrapper_img_man_opacity
-                }
-              >
-                <img
-                  onClick={() =>
-                    selectedFilter === "man"
-                      ? changeSelectedFilter("man-change")
-                      : changeSelectedFilter("man")
-                  }
-                  className={styles.img_man}
-                  src={img_man}
-                  alt="img-man"
-                />
-                {(selectedFilter === "man" ||
-                  selectedFilter === "man=change") &&
-                likedPeople &&
-                Object.keys(likedPeople).length ===
-                  Object.keys(selectedPhotos).length ? (
-                  <img
-                    src={img_smile}
-                    className={styles.img_smile}
-                    alt="img-smile"
-                  />
-                ) : null}
-              </div>
-              <div
-                className={
-                  likedPeople &&
-                  Object.keys(likedPeople).length ===
-                    Object.keys(selectedPhotos).length
-                    ? styles.wrapper_img_women
-                    : styles.wrapper_img_women_opacity
-                }
-              >
-                <img
-                  onClick={() =>
-                    selectedFilter === "women"
-                      ? changeSelectedFilter("women-change")
-                      : changeSelectedFilter("women")
-                  }
-                  className={styles.img_women}
-                  src={img_women}
-                  alt="img-women"
-                />
-                {(selectedFilter === "women" ||
-                  selectedFilter === "women-change") &&
-                likedPeople &&
-                Object.keys(likedPeople).length ===
-                  Object.keys(selectedPhotos).length ? (
-                  <img
-                    src={img_smile}
-                    className={styles.img_smile}
-                    alt="img-smile"
-                  />
-                ) : null}
-              </div>
-              {(selectedFilter === "man-women" ||
-                selectedFilter === "man" ||
-                selectedFilter === "women") &&
-              count_likes !== -1 &&
-              Object.keys(likedPeople).length ===
-                Object.keys(selectedPhotos).length ? (
-                <div className={styles.count_likes}> Count: {count_likes}</div>
-              ) : null}
-            </div>
-            {onClickShow ? (
+
               <div className={styles.block_photos}>
                 {photos &&
                   photos.map((el, index) => (
@@ -268,15 +313,47 @@ const App = props => {
                     />
                   ))}
               </div>
-            ) : null}{" "}
-            {Object.keys(selectedPhotos).length !== 0 ? (
-              <button
-                className={styles.button_enter}
-                onClick={() => getPhotosThunk(selectedFriend, selectedPhotos)}
-              >
-                Enter
-              </button>
-            ) : null}
+              <div className={styles.button_all_photos_and_enter}>
+                <button
+                  onClick={() => {
+                    changeSelectAllPhoto(!selectAllPhotos);
+                    let selectedPhotosCopy = {};
+                    photos.forEach(el => (selectedPhotosCopy[el.id] = true));
+                    changeSelectedPhotos(selectedPhotosCopy);
+                    //if (selectAllPhotos === false) changeSelectedPhotos({});
+                  }}
+                  className={styles.button_all_photos}
+                >
+                  Select All Photos
+                </button>
+                {Object.keys(selectedPhotos).length !== 0 ? (
+                  <button
+                    className={styles.button_enter}
+                    onClick={() => {
+                      if (selectAllPhotos) {
+                        getLikes(selectedFriend, "all");
+                      } else
+                        getLikes(selectedFriend, selectedPhotosWithoutFalse);
+                    }}
+                  >
+                    Enter
+                  </button>
+                ) : null}
+                {inspectState.load_info_likes_end && (
+                  <button
+                    onClick={() => changeClickListLikeP(!clickListLikeP)}
+                    className={styles.button_list_liked_people}
+                  >
+                    List liked people<br/>(Without Repeat)
+                  </button>
+                )}
+              </div>
+            </div>
+            {clickListLikeP && inspectState.load_info_likes_end && (
+              <div className={styles.list_liked_people}>
+                <ul>{listLikePeople}</ul>
+              </div>
+            )}
           </div>
         ) : null}
       </div>
@@ -286,16 +363,22 @@ const App = props => {
 
 export default connect(
   state => ({
-    friend: state.friendsReducer,
+    friends: state.friendsReducer.friends,
+    friendsState: state.friendsReducer,
     likedPeople: state.inspectReducer.likedPeople,
     count_photos: state.inspectReducer.count,
-    photos: state.inspectReducer.items
+    photos: state.inspectReducer.items,
+    inspectState: state.inspectReducer,
+    likedPeopleCopy: state.inspectReducer.likedPeopleCopy,
+    imgesByPeople: state.inspectReducer.imgesByPeople
   }),
   {
-    getFriendsThunk,
-    searchFriendThunk,
-    getPhotosThunk,
-    defaultStateInspect, loadFriends
+    loadFriends,
+    searchFriend,
+    getPhotos,
+    getLikes,
+    defaultStateInspect,
+    default_liked_people
   }
 )(App);
 
