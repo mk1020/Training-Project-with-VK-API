@@ -1,4 +1,5 @@
 // todo: rename
+//s
 import * as api from "../../api";
 export const AREA_FRIENDS = "AREA_FRIENDS";
 export const LIKED_PEOPLE = "LIKED_PEOPLE";

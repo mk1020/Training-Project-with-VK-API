@@ -78,18 +78,22 @@ const App = props => {
     if (likedPeople) {
       let count = 0;
       let list_liked_people_copy = [];
-          
+
       if (
         selectedFilter === "man-women" ||
         selectedFilter === "man-women-change"
       ) {
-console.log("konsole log",Object.keys(imgesByPeople).length)
-          for (const key in likedPeople) likedPeople[key].forEach((el)=> console.log(el.first_name+el.last_name))
+        console.log("konsole log", Object.keys(imgesByPeople).length);
+        for (const key in likedPeople)
+          likedPeople[key].forEach(el =>
+            console.log(el.first_name + el.last_name)
+          );
         for (const key in likedPeople) count += likedPeople[key].length;
         list_liked_people_copy.push(
           ...Object.keys(imgesByPeople).map((people, index) => (
             <li key={people.id + index}>
-              {imgesByPeople[people].first_name} {imgesByPeople[people].last_name}
+              {imgesByPeople[people].first_name}{" "}
+              {imgesByPeople[people].last_name}
             </li>
           ))
         );
@@ -104,7 +108,8 @@ console.log("konsole log",Object.keys(imgesByPeople).length)
               if (imgesByPeople[people].sex === 2)
                 list_liked_people_copy.push(
                   <li key={imgesByPeople[people].id + index}>
-                    {imgesByPeople[people].first_name} {imgesByPeople[people].last_name}
+                    {imgesByPeople[people].first_name}{" "}
+                    {imgesByPeople[people].last_name}
                   </li>
                 );
             });
@@ -120,7 +125,8 @@ console.log("konsole log",Object.keys(imgesByPeople).length)
               if (imgesByPeople[people].sex === 1)
                 list_liked_people_copy.push(
                   <li key={imgesByPeople[people].id + index}>
-                    {imgesByPeople[people].first_name} {imgesByPeople[people].last_name}
+                    {imgesByPeople[people].first_name}{" "}
+                    {imgesByPeople[people].last_name}
                   </li>
                 );
             });
@@ -145,6 +151,11 @@ console.log("konsole log",Object.keys(imgesByPeople).length)
     for (const key in selectedPhotos)
       if (selectedPhotos[key]) IdImgWithoutFalse[key] = selectedPhotos[key];
     changeSelectedPhotosWithoutFalse(IdImgWithoutFalse);
+    if (
+      Object.keys(IdImgWithoutFalse).length === 0 &&
+      Object.keys(selectedPhotos).length !== 0
+    ) { 
+      changeSelectedPhotos({});}
   }, [selectedPhotos]);
 
   return (
@@ -341,7 +352,7 @@ console.log("konsole log",Object.keys(imgesByPeople).length)
                     onClick={() => changeClickListLikeP(!clickListLikeP)}
                     className={styles.button_list_liked_people}
                   >
-                    List liked people
+                    List liked people<br/>(Without Repeat)
                   </button>
                 )}
               </div>
