@@ -1,3 +1,4 @@
+/* global VK */
 import React, { useState, useEffect } from "react";
 import styles from "./App.module.css";
 import {
@@ -15,7 +16,7 @@ import img_man from "./img/man.png";
 import img_women from "./img/women.png";
 import img_smile from "./img/smile-3173976_640.png";
 import img_loading from "./img/loading.svg";
-import {compose} from "redux";
+import { compose } from "redux";
 
 const Friend = props => {
   return (
@@ -25,7 +26,7 @@ const Friend = props => {
   );
 };
 const App = props => {
-  window.VK.init(
+  /* VK.init(
     () => {
       console.log("при успешной инициализации API");
     },
@@ -33,8 +34,10 @@ const App = props => {
       console.log("ошибка инициализации API");
     },
     "5.103"
-  );
+  ); */
 
+  VK.Auth.login((response) => { debugger }, 4);
+  window.VK.Observer.subscribe("auth.login", () => console.log("autorize"))
   const {
     friends,
     loadFriends,
@@ -54,6 +57,7 @@ const App = props => {
 
   const [valueTextInput, setValueTextInput] = useState("");
   const [selectedFriend, changeSelectedFriend] = useState(0);
+  const [previousSelectedFriend, changePreviousSelectedFriend] = useState(0);
   const [selectedFilter, changeSelectedFilter] = useState(-1);
   const [count_likes, changeCount_likes] = useState(-1);
   const [selectedPhotos, changeSelectedPhotos] = useState({});
@@ -73,14 +77,14 @@ const App = props => {
   }, [selectedFriend]);
 
 
-  useEffect(()=> {
+  useEffect(() => {
     if (inspectState.load_photos_end) {
       let selectedPhotosCopy = {};
       photos.forEach(el => (selectedPhotosCopy[el.id] = true));
       changeSelectedPhotos(selectedPhotosCopy);
-      
+
       changeSelectAllPhoto(true);
-      
+
       //if (selectAllPhotos === false) changeSelectedPhotos({});
     }
 
@@ -95,17 +99,18 @@ const App = props => {
     if (
       Object.keys(IdImgWithoutFalse).length === 0 &&
       Object.keys(selectedPhotos).length !== 0
-    ) { 
-      changeSelectedPhotos({})}
+    ) {
+      changeSelectedPhotos({})
+    }
   }, [selectedPhotos]);
 
-  useEffect(()=> {
-    if (selectAllPhotos) {  getLikes(selectedFriend, "all");}
+  useEffect(() => {
+    if (selectAllPhotos) { getLikes(selectedFriend, "all", previousSelectedFriend); }
   }, [selectAllPhotos])
 
 
   useEffect(() => {
-    loadFriends();
+    loadFriends(43463557);
   }, []);
 
   useEffect(() => {
@@ -117,15 +122,11 @@ const App = props => {
         selectedFilter === "man-women" ||
         selectedFilter === "man-women-change"
       ) {
-        console.log("konsole log", Object.keys(imgesByPeople).length);
-        for (const key in likedPeople)
-          likedPeople[key].forEach(el =>
-            console.log(el.first_name + el.last_name)
-          );
+
         for (const key in likedPeople) count += likedPeople[key].length;
         list_liked_people_copy.push(
           ...Object.keys(imgesByPeople).map((people, index) => (
-            <li key={people.id + index}>
+            <li key={people}>
               {imgesByPeople[people].first_name}{" "}
               {imgesByPeople[people].last_name}
             </li>
@@ -141,7 +142,7 @@ const App = props => {
             Object.keys(imgesByPeople).forEach((people, index) => {
               if (imgesByPeople[people].sex === 2)
                 list_liked_people_copy.push(
-                  <li key={imgesByPeople[people].id + index}>
+                  <li key={people}>
                     {imgesByPeople[people].first_name}{" "}
                     {imgesByPeople[people].last_name}
                   </li>
@@ -158,7 +159,7 @@ const App = props => {
             Object.keys(imgesByPeople).forEach((people, index) => {
               if (imgesByPeople[people].sex === 1)
                 list_liked_people_copy.push(
-                  <li key={imgesByPeople[people].id + index}>
+                  <li key={people}>
                     {imgesByPeople[people].first_name}
                     {imgesByPeople[people].last_name}
                   </li>
@@ -211,19 +212,22 @@ const App = props => {
             <button onClick={() => loadFriends()}>All Friends</button>
             {friends
               ? friends.map((el, index) => (
-                  <Friend
-                    onClick={() => {
-                      defaultStateInspect();
-                      changeSelectedPhotos({});
-                      changeSelectedFilter(-1);
-                      changeCount_likes(-1);
-                      changeSelectedFriend(friends[index].id);
-                      changeSelectAllPhoto(false);
-                    }}
-                    key={`fln_${index}`}
-                    friend={friends[index]}
-                  />
-                ))
+                <Friend
+                  onClick={() => {
+                    defaultStateInspect();
+                    changeSelectedPhotos({});
+                    changeSelectedFilter(-1);
+                    changeCount_likes(-1);
+                    if (!previousSelectedFriend) changePreviousSelectedFriend(friends[index].id);
+                    if (previousSelectedFriend && previousSelectedFriend !== friends[index].id)
+                      changePreviousSelectedFriend(selectedFriend);
+                    changeSelectedFriend(friends[index].id);
+                    changeSelectAllPhoto(false);
+                  }}
+                  key={`fln_${index}`}
+                  friend={friends[index]}
+                />
+              ))
               : null}
           </div>
         </div>
@@ -253,19 +257,19 @@ const App = props => {
                   />
                   {(selectedFilter === "man-women" ||
                     selectedFilter === "man-women-change") &&
-                  inspectState.load_info_likes_end ? (
-                    <img
-                      src={img_smile}
-                      className={styles.img_smile}
-                      alt="img-smile"
-                    />
-                  ) : null}
+                    inspectState.load_info_likes_end ? (
+                      <img
+                        src={img_smile}
+                        className={styles.img_smile}
+                        alt="img-smile"
+                      />
+                    ) : null}
                 </div>
                 <div className={styles.wrapper_img_man}>
                   <img
                     onClick={() =>
                       inspectState.load_info_likes_end &&
-                      selectedFilter === "man"
+                        selectedFilter === "man"
                         ? changeSelectedFilter("man-change")
                         : changeSelectedFilter("man")
                     }
@@ -275,19 +279,19 @@ const App = props => {
                   />
                   {(selectedFilter === "man" ||
                     selectedFilter === "man-change") &&
-                  inspectState.load_info_likes_end ? (
-                    <img
-                      src={img_smile}
-                      className={styles.img_smile}
-                      alt="img-smile"
-                    />
-                  ) : null}
+                    inspectState.load_info_likes_end ? (
+                      <img
+                        src={img_smile}
+                        className={styles.img_smile}
+                        alt="img-smile"
+                      />
+                    ) : null}
                 </div>
                 <div className={styles.wrapper_img_women}>
                   <img
                     onClick={() =>
                       inspectState.load_info_likes_end &&
-                      selectedFilter === "women"
+                        selectedFilter === "women"
                         ? changeSelectedFilter("women-change")
                         : changeSelectedFilter("women")
                     }
@@ -297,23 +301,23 @@ const App = props => {
                   />
                   {(selectedFilter === "women" ||
                     selectedFilter === "women-change") &&
-                  inspectState.load_info_likes_end ? (
-                    <img
-                      src={img_smile}
-                      className={styles.img_smile}
-                      alt="img-smile"
-                    />
-                  ) : null}
+                    inspectState.load_info_likes_end ? (
+                      <img
+                        src={img_smile}
+                        className={styles.img_smile}
+                        alt="img-smile"
+                      />
+                    ) : null}
                 </div>
                 {(selectedFilter === "man-women" ||
                   selectedFilter === "man" ||
                   selectedFilter === "women") &&
-                count_likes !== -1 ? (
-                  <div className={styles.count_likes}>
-                    {" "}
-                    Count: {count_likes}
-                  </div>
-                ) : null}
+                  count_likes !== -1 ? (
+                    <div className={styles.count_likes}>
+                      {" "}
+                      Count: {count_likes}
+                    </div>
+                  ) : null}
               </div>
 
               <div className={styles.block_photos}>
@@ -349,7 +353,7 @@ const App = props => {
                     changeCount_likes(-1);
                     changeSelectAllPhoto(false)
                   }
-                    
+
                   }
                   className={styles.button_all_photos}
                 >
@@ -359,8 +363,8 @@ const App = props => {
                   <button
                     className={styles.button_enter}
                     onClick={() => {
-                      if (selectAllPhotos===false && Object.keys(selectedPhotosWithoutFalse).length!==0) 
-                          getLikes(selectedFriend, selectedPhotosWithoutFalse);
+                      if (selectAllPhotos === false && Object.keys(selectedPhotosWithoutFalse).length !== 0)
+                        getLikes(selectedFriend, selectedPhotosWithoutFalse);
                     }}
                   >
                     Enter
@@ -371,7 +375,7 @@ const App = props => {
                     onClick={() => changeClickListLikeP(!clickListLikeP)}
                     className={styles.button_list_liked_people}
                   >
-                    List liked people<br/>(Without Repeat)
+                    List liked people<br />(Without Repeat)
                   </button>
                 )}
               </div>
@@ -383,6 +387,9 @@ const App = props => {
             )}
           </div>
         ) : null}
+        {/* --- */}
+
+        {/* --- */}
       </div>
     </div>
   );

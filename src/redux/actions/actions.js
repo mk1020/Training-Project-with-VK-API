@@ -45,9 +45,9 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export const loadFriends = () => async dispatch => {
+export const loadFriends = (user_id) => async dispatch => {
   dispatch({ type: LOADING_FREINDS });
-  await api.getFriends().then(
+  await api.getFriends(user_id).then(
     data => {
       dispatch({ type: LOADING_FREINDS });
       data && dispatch(areaFriend(data.items));
@@ -90,7 +90,7 @@ export const getPhotos = user_id => dispatch => {
   });
 };
 
-export const getLikes = (user_id, IdImg) => dispatch => {
+export const getLikes = (user_id, IdImg, previousSelectedFriend) => dispatch => {
   //получаем id фоток
   api.photosGetAll(user_id).then(
     async dataPhotos => {
@@ -103,6 +103,7 @@ export const getLikes = (user_id, IdImg) => dispatch => {
       const forWithSleep = async () => {
         // массив id фоток [123,125, 543 и тд]
         for (const el in IdImages) {
+
           // получаем массив id пользователей, которые лайкнули
           api
             .likesGetList(user_id, IdImg === "all" ? IdImages[el].id : el)
@@ -171,6 +172,6 @@ export const getLikes = (user_id, IdImg) => dispatch => {
 // выбираем моего друга что-бы узнать кого он лайкал.
 // алгоритм:
 // 1) выбрать моего друга,
-// 2) получить всех его друзей и
+// 2) получить всех его друзей 
 // 3) у каждого из этих друзей получить все фотки
 // 4) проверить каждую фотку, является ли она объектом, который лайкнул мой друг
