@@ -1,14 +1,14 @@
 import * as types from "../actions/actions";
 
-export const inspectReducer = (state = {}, action) => {
+export const inspectWhoLikedReducer = (state = {}, action) => {
   switch (action.type) {
     case types.LIKED_PEOPLE_UP: {
       let likedPeopleCopy = {};
       let IdImgCopy = {};
       Array.isArray(action.IdImg)
         ? action.IdImg.forEach(
-            (el, ind) => (IdImgCopy[action.IdImg[ind].id] = true)
-          )
+          (el, ind) => (IdImgCopy[action.IdImg[ind].id] = true)
+        )
         : (IdImgCopy = action.IdImg);
 
       for (const key in state.likedPeople)

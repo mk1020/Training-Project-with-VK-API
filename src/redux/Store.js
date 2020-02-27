@@ -1,9 +1,10 @@
 import { createStore, combineReducers, applyMiddleware, compose } from "redux";
 import thunkMiddleware from "redux-thunk";
 import { friendsReducer } from "./reducers/friendsReducer";
-import { inspectReducer } from "./reducers/inspectReducer";
+import { inspectWhoLikedReducer } from "./reducers/inspectWhoLikedReducer";
+import { inspectWhomLikedReducer } from "./reducers/inspectWhomLikedReducer";
 
-const reducers = combineReducers({ friendsReducer, inspectReducer });
+const reducers = combineReducers({ friendsReducer, inspectWhoLikedReducer, inspectWhomLikedReducer });
 
 const store = createStore(
   reducers,

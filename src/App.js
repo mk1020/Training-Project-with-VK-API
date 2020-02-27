@@ -7,7 +7,8 @@ import {
   getPhotos,
   getLikes,
   defaultStateInspect,
-  default_liked_people
+  default_liked_people,
+  loadFriendsMyFriend
 } from "./redux/actions/actions";
 import { uniqBy, isEqual } from "lodash";
 import { connect } from "react-redux";
@@ -36,8 +37,6 @@ const App = props => {
     "5.103"
   ); */
 
-  VK.Auth.login((response) => { debugger }, 4);
-  window.VK.Observer.subscribe("auth.login", () => console.log("autorize"))
   const {
     friends,
     loadFriends,
@@ -52,7 +51,8 @@ const App = props => {
     inspectState,
     default_liked_people,
     likedPeopleCopy,
-    imgesByPeople
+    imgesByPeople,
+    loadFriendsMyFriend
   } = props;
 
   const [valueTextInput, setValueTextInput] = useState("");
@@ -73,7 +73,8 @@ const App = props => {
 
 
   useEffect(() => {
-    selectedFriend && getPhotos(selectedFriend);
+    selectedFriend && loadFriendsMyFriend(selectedFriend)
+    //selectedFriend && getPhotos(selectedFriend);
   }, [selectedFriend]);
 
 
@@ -215,6 +216,7 @@ const App = props => {
                 <Friend
                   onClick={() => {
                     defaultStateInspect();
+                    changeListLikePeople([]);
                     changeSelectedPhotos({});
                     changeSelectedFilter(-1);
                     changeCount_likes(-1);
@@ -231,7 +233,7 @@ const App = props => {
               : null}
           </div>
         </div>
-        {selectedFriend !== 0 ? (
+        {/* {selectedFriend !== 0 ? (
           <div className={styles.wrapper_wrapper_rightArea}>
             <div className={styles.wrapper_rightArea}>
               <div className={styles.rightArea}>
@@ -386,10 +388,8 @@ const App = props => {
               </div>
             )}
           </div>
-        ) : null}
-        {/* --- */}
+        ) : null} */}
 
-        {/* --- */}
       </div>
     </div>
   );
@@ -399,12 +399,12 @@ export default connect(
   state => ({
     friends: state.friendsReducer.friends,
     friendsState: state.friendsReducer,
-    likedPeople: state.inspectReducer.likedPeople,
-    count_photos: state.inspectReducer.count,
-    photos: state.inspectReducer.items,
-    inspectState: state.inspectReducer,
-    likedPeopleCopy: state.inspectReducer.likedPeopleCopy,
-    imgesByPeople: state.inspectReducer.imgesByPeople
+    likedPeople: state.inspectWhoLikedReducer.likedPeople,
+    count_photos: state.inspectWhoLikedReducer.count,
+    photos: state.inspectWhoLikedReducer.items,
+    inspectState: state.inspectWhoLikedReducer,
+    likedPeopleCopy: state.inspectWhoLikedReducer.likedPeopleCopy,
+    imgesByPeople: state.inspectWhoLikedReducer.imgesByPeople
   }),
   {
     loadFriends,
@@ -412,7 +412,8 @@ export default connect(
     getPhotos,
     getLikes,
     defaultStateInspect,
-    default_liked_people
+    default_liked_people,
+    loadFriendsMyFriend
   }
 )(App);
 
