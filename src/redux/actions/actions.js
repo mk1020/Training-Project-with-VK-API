@@ -14,8 +14,8 @@ export const LIKED_PEOPLE_UP = "LIKED_PEOPLE_UP";
 export const LOAD_INFO_LIKES_START = "LOAD_INFO_LIKES_START";
 export const LOAD_INFO_LIKES_END = "LOAD_INFO_LIKES_END";
 export const IMGES_BY_PEOPLE = "IMGES_BY_PEOPLE";
-export const LOAD_FRIENDS_OF_FRIEND_START = "LOAD_FRIENDS_OF_FRIEND_START";
-export const LOAD_FRIENDS_OF_FRIEND_END = "LOAD_FRIENDS_OF_FRIEND_END";
+export const WHO_WERE_LIKED_START = "WHO_WERE_LIKED_START";
+export const WHO_WERE_LIKED_END = "WHO_WERE_LIKED_END";
 export const FRIENDS_OF_FRIEND = "FRIENDS_OF_FRIEND";
 
 export const areaFriend = arrayFriends => ({
@@ -152,59 +152,69 @@ export const getLikes = (user_id, IdImg, previousSelectedFriend) => dispatch => 
 };
 
 export const loadFriendsMyFriend = (user_id) => async dispatch => {
-  dispatch({ type: LOAD_FRIENDS_OF_FRIEND_START });
-  await api.getFriends(user_id).then(
-    async data => {// тут друзья моего выбранного друга
-      for (const friend of data.items) {
-        await api.photosGetAll(friend.id).then(async (photos) => {
-          if (photos.error && photos.error.error_msg === "This profile is private") {
-            console.log("is private profiles!");
-            return null;
-          }
-          let requestsIsLiked = '';
-          let index = 0;
-          let countLikes = 0;
-          let wasLiked = {};
-          for (const photo of photos.items) {
-            if (index <= 24)
-              requestsIsLiked += `photo${index}: API.likes.isLiked({user_id: ${user_id},
+  dispatch({ type: WHO_WERE_LIKED_START });
+
+  let countFriends;
+  let offsetFriends = 0;
+  do {
+    await api.getFriends(user_id, offsetFriends).then(
+      async data => {// тут друзья моего выбранного друга
+        countFriends = data.count;
+        let wereLiked = {};
+        for (const friend of data.items) {
+          await sleep(200);
+          let countPhotos;
+          let offsetPhotos = 0;
+          do {
+            await api.photosGetAll(friend.id, offsetPhotos).then(async (photos) => {
+              countPhotos = photos.count;
+              await sleep(70);
+              let requestsIsLiked = '';
+              let index = 1;
+              let countLikes = 0;
+              for (const photo of photos.items) {
+                if (index % 25 !== 0 && photos.items.length - index !== 0)
+                  requestsIsLiked += `photo${index}: API.likes.isLiked({user_id: ${user_id},
                  type: "photo", owner_id: ${friend.id}, item_id: ${photo.id},  v: 5.103}),`;
-            else {
-              requestsIsLiked = requestsIsLiked.slice(0, requestsIsLiked.length - 1);
-
-              await api.execute(requestsIsLiked).then((photosIsLiked) => {
-                for (const isLikedPhoto in photosIsLiked) if (photosIsLiked[isLikedPhoto].liked === 1) {
-                  countLikes++;
-                  wasLiked[friend.id] = countLikes;
-                  debugger
+                else {
+                  requestsIsLiked = requestsIsLiked.slice(0, requestsIsLiked.length - 1);
+                  await sleep(200);
+                  await api.execute(requestsIsLiked).then((photosIsLiked) => {
+                    for (const isLikedPhoto in photosIsLiked) if (photosIsLiked[isLikedPhoto].liked === 1) {
+                      countLikes++;
+                      wereLiked[friend.id] = { countLikes: countLikes, first_name: friend.first_name, last_name: friend.last_name };
+                      //debugger
+                    }
+                  }, (error) => {
+                    console.log("friend", friend, "photos", photos, "countLikes", countLikes, "index", index)
+                    debugger
+                    console.log(`method name: ${api.execute.name} `, error.error);
+                    //alert("Произошла ошибка! Подробности в консоле.");
+                  })
+                  // debugger
+                  requestsIsLiked = '';
                 }
-              }, (error) => {
-                console.log(`method name: ${api.execute.name} index `, error.error);
-                alert("Произошла ошибка! Подробности в консоле.");
-              })
-              index = 0;
-              requestsIsLiked = `photo${index}: API.likes.isLiked({user_id: ${user_id},
-                type: "photo", owner_id: ${friend.id}, item_id: ${photo.id},  v: 5.103}),`;
+                index++;
+              }
+            }, (error) => {
+              console.log(`method name: ${api.photosGetAll.name}`, error.error);
+              //  alert("Произошла ошибка! Подробности в консоле.");
             }
+            )
+            offsetPhotos += 200;
 
-            index++;
-          }
-
-        }, (error) => {
-
-          console.log(`method name: ${api.photosGetAll.name}`, error.error);
-          alert("Произошла ошибка! Подробности в консоле.");
+          } while (offsetPhotos < countPhotos)
         }
-        )
+        debugger
+        dispatch({ type: WHO_WERE_LIKED_END, wereLiked: wereLiked });
+      }, (error) => {
+        debugger
+        console.log(`method name: ${api.getFriends.name}`, error.error);
+        alert("Произошла ошибка! Подробности в консоле.");
       }
-      dispatch({ type: LOAD_FRIENDS_OF_FRIEND_END });
-      dispatch({ type: FRIENDS_OF_FRIEND, items: data.items })
-    }, (error) => {
-      debugger
-      console.log(`method name: ${api.getFriends.name}`, error.error);
-      alert("Произошла ошибка! Подробности в консоле.");
-    }
-  )
+    )
+    offsetFriends += 5000;
+  } while (offsetFriends < countFriends)
 }
 
 

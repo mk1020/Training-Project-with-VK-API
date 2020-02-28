@@ -1,10 +1,10 @@
 const api_token =
   "7b0cb4e7a555154329829579c4f2098c17641ade88bf6ce391f0c4236db9f05efddf0713a8bb64124a003";
 
-export const getFriends = (user_id) =>
+export const getFriends = (user_id, offset) =>
   new Promise((resolve, reject) =>
     window.VK.api(
-      "friends.get", { v: 5.103, fields: "firsname", user_id: user_id, access_token: api_token },
+      "friends.get", { v: 5.103, fields: "firsname", user_id: user_id, offset: offset, access_token: api_token },
       data =>
         data.error ? reject(data) : resolve(data.response)
     )
@@ -24,7 +24,7 @@ export const friendsSearch = (search_line, user_id) =>
     )
   );
 
-export const photosGetAll = user_id =>
+export const photosGetAll = (user_id, offset) =>
   new Promise((resolve, reject) =>
     window.VK.api(
       //получаем id фоток
@@ -32,11 +32,12 @@ export const photosGetAll = user_id =>
       owner_id: user_id,
       count: 200,
       v: "5.103",
+      offset: offset,
       access_token: api_token
     },
       data =>
-        data.error && data.error.error_msg !== "This profile is private" ?
-          reject(data) : data.response ? resolve(data.response) : resolve(data)
+        data.error ?
+          reject(data) : resolve(data.response)
     )
   );
 

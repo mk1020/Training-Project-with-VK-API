@@ -27,7 +27,7 @@ const Friend = props => {
   );
 };
 const App = props => {
-  /* VK.init(
+  VK.init(
     () => {
       console.log("при успешной инициализации API");
     },
@@ -35,7 +35,7 @@ const App = props => {
       console.log("ошибка инициализации API");
     },
     "5.103"
-  ); */
+  );
 
   const {
     friends,
