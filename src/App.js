@@ -8,7 +8,7 @@ import {
   getLikes,
   defaultStateInspect,
   default_liked_people,
-  loadFriendsMyFriend
+  loadWhomPutLike
 } from "./redux/actions/actions";
 import { uniqBy, isEqual } from "lodash";
 import { connect } from "react-redux";
@@ -52,7 +52,7 @@ const App = props => {
     default_liked_people,
     likedPeopleCopy,
     imgesByPeople,
-    loadFriendsMyFriend
+    loadWhomPutLike
   } = props;
 
   const [valueTextInput, setValueTextInput] = useState("");
@@ -69,11 +69,14 @@ const App = props => {
   const [selectAllPhotos, changeSelectAllPhoto] = useState(false);
   const [clickListLikeP, changeClickListLikeP] = useState(false);
   const [listLikePeople, changeListLikePeople] = useState([]);
+  const [quantityLoad, changeQuantityLoad] = useState(0);
   const user_id = "43463557";
 
 
   useEffect(() => {
-    selectedFriend && loadFriendsMyFriend(selectedFriend)
+    console.log(props.store)
+    debugger
+    selectedFriend && loadWhomPutLike(selectedFriend, quantityLoad)
     //selectedFriend && getPhotos(selectedFriend);
   }, [selectedFriend]);
 
@@ -223,8 +226,9 @@ const App = props => {
                     if (!previousSelectedFriend) changePreviousSelectedFriend(friends[index].id);
                     if (previousSelectedFriend && previousSelectedFriend !== friends[index].id)
                       changePreviousSelectedFriend(selectedFriend);
-                    changeSelectedFriend(friends[index].id);
                     changeSelectAllPhoto(false);
+                    changeQuantityLoad(quantityLoad + 1);
+                    changeSelectedFriend(friends[index].id);
                   }}
                   key={`fln_${index}`}
                   friend={friends[index]}
@@ -413,7 +417,7 @@ export default connect(
     getLikes,
     defaultStateInspect,
     default_liked_people,
-    loadFriendsMyFriend
+    loadWhomPutLike
   }
 )(App);
 

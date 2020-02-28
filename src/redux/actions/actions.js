@@ -14,9 +14,10 @@ export const LIKED_PEOPLE_UP = "LIKED_PEOPLE_UP";
 export const LOAD_INFO_LIKES_START = "LOAD_INFO_LIKES_START";
 export const LOAD_INFO_LIKES_END = "LOAD_INFO_LIKES_END";
 export const IMGES_BY_PEOPLE = "IMGES_BY_PEOPLE";
-export const WHO_WERE_LIKED_START = "WHO_WERE_LIKED_START";
-export const WHO_WERE_LIKED_END = "WHO_WERE_LIKED_END";
+export const LOAD_WHOM_PUT_LIKE_START = "LOAD_WHOM_PUT_LIKE_START";
+export const LOAD_WHOM_PUT_LIKE_END = "LOAD_WHOM_PUT_LIKE_END";
 export const FRIENDS_OF_FRIEND = "FRIENDS_OF_FRIEND";
+export const QUANTITY_LOAD = "QUANTITY_LOAD";
 
 export const areaFriend = arrayFriends => ({
   type: AREA_FRIENDS,
@@ -82,7 +83,7 @@ export const getPhotos = user_id => dispatch => {
   });
 };
 
-export const getLikes = (user_id, IdImg, previousSelectedFriend) => dispatch => {
+export const getLikes = (user_id, IdImg, previousSelectedFriend) => (dispatch) => {
   //получаем id фоток
   api.photosGetAll(user_id).then(
     async dataPhotos => {
@@ -151,8 +152,9 @@ export const getLikes = (user_id, IdImg, previousSelectedFriend) => dispatch => 
   );
 };
 
-export const loadFriendsMyFriend = (user_id) => async dispatch => {
-  dispatch({ type: WHO_WERE_LIKED_START });
+export const loadWhomPutLike = (user_id, quantityLoad, store) => async (dispatch, getState) => {
+  dispatch({ type: QUANTITY_LOAD, quantityLoad: quantityLoad });
+  dispatch({ type: LOAD_WHOM_PUT_LIKE_START });
 
   let countFriends;
   let offsetFriends = 0;
@@ -206,7 +208,7 @@ export const loadFriendsMyFriend = (user_id) => async dispatch => {
           } while (offsetPhotos < countPhotos)
         }
         debugger
-        dispatch({ type: WHO_WERE_LIKED_END, wereLiked: wereLiked });
+        dispatch({ type: LOAD_WHOM_PUT_LIKE_END, wereLiked: wereLiked });
       }, (error) => {
         debugger
         console.log(`method name: ${api.getFriends.name}`, error.error);

@@ -4,7 +4,13 @@ const api_token =
 export const getFriends = (user_id, offset) =>
   new Promise((resolve, reject) =>
     window.VK.api(
-      "friends.get", { v: 5.103, fields: "firsname", user_id: user_id, offset: offset, access_token: api_token },
+      "friends.get", {
+      v: 5.103,
+      fields: "firsname",
+      user_id: user_id,
+      offset: offset,
+      access_token: api_token
+    },
       data =>
         data.error ? reject(data) : resolve(data.response)
     )
