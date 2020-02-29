@@ -1,6 +1,9 @@
 /* global VK */
 import React, { useState, useEffect } from "react";
 import styles from "./App.module.css";
+import {Tab, Tabs, TabList, TabPanel} from "react-tabs";
+import 'react-tabs/style/react-tabs.css'; 
+import './react-tabs-custom.css';
 import {
   loadFriends,
   searchFriend,
@@ -18,6 +21,7 @@ import img_women from "./img/women.png";
 import img_smile from "./img/smile-3173976_640.png";
 import img_loading from "./img/loading.svg";
 import { compose } from "redux";
+import {useDispatch} from 'react-redux';
 
 const Friend = props => {
   return (
@@ -52,7 +56,8 @@ const App = props => {
     default_liked_people,
     likedPeopleCopy,
     imgesByPeople,
-    loadWhomPutLike
+    loadWhomPutLike,
+    whomLikedReducerState
   } = props;
 
   const [valueTextInput, setValueTextInput] = useState("");
@@ -70,23 +75,21 @@ const App = props => {
   const [clickListLikeP, changeClickListLikeP] = useState(false);
   const [listLikePeople, changeListLikePeople] = useState([]);
   const [quantityLoad, changeQuantityLoad] = useState(0);
+  const [onClickSecondTab, changeOnClickSecondTab] = useState(false);
+  const [listPutLike, changeListPutLike] = useState([]);
   const user_id = "43463557";
 
-
   useEffect(() => {
-    console.log(props.store)
-    debugger
     selectedFriend && loadWhomPutLike(selectedFriend, quantityLoad)
     //selectedFriend && getPhotos(selectedFriend);
   }, [selectedFriend]);
 
-
+     
   useEffect(() => {
     if (inspectState.load_photos_end) {
       let selectedPhotosCopy = {};
       photos.forEach(el => (selectedPhotosCopy[el.id] = true));
       changeSelectedPhotos(selectedPhotosCopy);
-
       changeSelectAllPhoto(true);
 
       //if (selectAllPhotos === false) changeSelectedPhotos({});
@@ -182,6 +185,23 @@ const App = props => {
   }, [selectedFilter]);
 
 
+  useEffect(()=> {
+   if (whomLikedReducerState.whomPutLikeEnd) {
+    changeListPutLike( Object.keys(whomLikedReducerState.wereLiked).map((people)=>
+      <li key={people} > 
+    <input class={styles.hide} id={people} type="checkbox" />
+    <label for={people}>
+      {whomLikedReducerState.wereLiked[people].first_name} {whomLikedReducerState.wereLiked[people].last_name}</label>
+        <div>
+        Count Likes: {whomLikedReducerState.wereLiked[people].countLikes}
+        </div>
+      </li>  
+    ));
+    
+   } 
+  }, [whomLikedReducerState.whomPutLikeEnd])
+
+
   return (
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
@@ -237,7 +257,14 @@ const App = props => {
               : null}
           </div>
         </div>
-        {/* {selectedFriend !== 0 ? (
+        <Tabs className="react-tabs">
+          <TabList className="react-tabs__tab-list">
+            <Tab>Who Liked</Tab>
+            <Tab onClick={()=> changeOnClickSecondTab(true)}>Whom Liked</Tab>
+          </TabList>
+
+          <TabPanel>
+          {selectedFriend !== 0 ? (
           <div className={styles.wrapper_wrapper_rightArea}>
             <div className={styles.wrapper_rightArea}>
               <div className={styles.rightArea}>
@@ -392,7 +419,21 @@ const App = props => {
               </div>
             )}
           </div>
-        ) : null} */}
+        ) : null}
+          </TabPanel>
+
+          <TabPanel>
+          {selectedFriend !== 0 && onClickSecondTab ? 
+             whomLikedReducerState.whomPutLikeStart ? (
+              <img className={styles.img_loading_put_like} src={img_loading} />
+            ) : 
+           <div className={styles.list_put_like}>
+             This people liked:
+              <ul>{listPutLike}</ul>
+          </div>: null}
+          </TabPanel>
+        </Tabs>   
+
 
       </div>
     </div>
@@ -408,8 +449,9 @@ export default connect(
     photos: state.inspectWhoLikedReducer.items,
     inspectState: state.inspectWhoLikedReducer,
     likedPeopleCopy: state.inspectWhoLikedReducer.likedPeopleCopy,
-    imgesByPeople: state.inspectWhoLikedReducer.imgesByPeople
-  }),
+    imgesByPeople: state.inspectWhoLikedReducer.imgesByPeople,
+    whomLikedReducerState: state.inspectWhomLikedReducer,
+  }),   
   {
     loadFriends,
     searchFriend,

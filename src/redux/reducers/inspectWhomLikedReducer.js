@@ -6,7 +6,6 @@ export const inspectWhomLikedReducer = (state = {}, action) => {
             return { ...state, whomPutLikeStart: true, whomPutLikeEnd: false }
         }
         case types.LOAD_WHOM_PUT_LIKE_END: {
-            debugger
             return {
                 ...state, whomPutLikeEnd: true,
                 whomPutLikeStart: false,

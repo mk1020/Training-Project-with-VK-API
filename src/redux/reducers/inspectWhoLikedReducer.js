@@ -5,24 +5,30 @@ export const inspectWhoLikedReducer = (state = {}, action) => {
     case types.LIKED_PEOPLE_UP: {
       let likedPeopleCopy = {};
       let IdImgCopy = {};
-      Array.isArray(action.IdImg)
-        ? action.IdImg.forEach(
+      Array.isArray(action.IdImg) ?
+        action.IdImg.forEach(
           (el, ind) => (IdImgCopy[action.IdImg[ind].id] = true)
-        )
-        : (IdImgCopy = action.IdImg);
+        ) :
+        (IdImgCopy = action.IdImg);
 
       for (const key in state.likedPeople)
         if (Object.keys(IdImgCopy).indexOf(key) !== -1)
           likedPeopleCopy[key] = state.likedPeople[key];
 
-      return { ...state, likedPeople: likedPeopleCopy };
+      return {
+        ...state,
+        likedPeople: likedPeopleCopy
+      };
     }
     case types.LIKED_PEOPLE: {
       let obj = {};
       obj[action.idPhoto] = action.arrayLikedPeople; //объект: id: [массив obj]
       return {
         ...state,
-        likedPeople: { ...state.likedPeople, ...obj }
+        likedPeople: {
+          ...state.likedPeople,
+          ...obj
+        }
       };
     }
     case types.IMGES_BY_PEOPLE: {
@@ -30,19 +36,33 @@ export const inspectWhoLikedReducer = (state = {}, action) => {
       for (const photo in state.likedPeople)
         state.likedPeople[photo].forEach(
           people =>
-            (imgesByPeople[people.id] = {
-              ...imgesByPeople[people.id], first_name: people.first_name, last_name: people.last_name, sex: people.sex,
-              [photo]: ""
-            })
+          (imgesByPeople[people.id] = {
+            ...imgesByPeople[people.id],
+            first_name: people.first_name,
+            last_name: people.last_name,
+            sex: people.sex,
+            [photo]: ""
+          })
         );
 
-      return { ...state, imgesByPeople: imgesByPeople };
+      return {
+        ...state,
+        imgesByPeople: imgesByPeople
+      };
     }
     case types.LOAD_PHOTOS_START: {
-      return { ...state, load_photos_start: true, load_photos_end: false };
+      return {
+        ...state,
+        load_photos_start: true,
+        load_photos_end: false
+      };
     }
     case types.LOAD_PHOTOS_END: {
-      return { ...state, load_photos_end: true, load_photos_start: false };
+      return {
+        ...state,
+        load_photos_end: true,
+        load_photos_start: false
+      };
     }
     case types.LOAD_INFO_LIKES_START: {
       return {
