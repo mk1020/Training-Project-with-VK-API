@@ -1,3 +1,4 @@
+/* eslint-disable no-loop-func */
 // todo: rename
 //s
 import * as api from "../../api";
@@ -18,6 +19,10 @@ export const LOAD_WHOM_PUT_LIKE_START = "LOAD_WHOM_PUT_LIKE_START";
 export const LOAD_WHOM_PUT_LIKE_END = "LOAD_WHOM_PUT_LIKE_END";
 export const FRIENDS_OF_FRIEND = "FRIENDS_OF_FRIEND";
 export const QUANTITY_LOAD = "QUANTITY_LOAD";
+
+const api_token =
+  "7b0cb4e7a555154329829579c4f2098c17641ade88bf6ce391f0c4236db9f05efddf0713a8bb64124a003";
+
 
 export const areaFriend = arrayFriends => ({
   type: AREA_FRIENDS,
@@ -107,29 +112,43 @@ export const getLikes = (user_id, IdImg, previousSelectedFriend) => (dispatch) =
           type: LOAD_INFO_LIKES_START
         });
         const forWithSleep = async () => {
+          let requestLikesGetList='';
           // массив id фоток [123,125, 543 и тд]
+
+          let index = 1;
+          let offsetLikesGetList = 0;
           for (const el in IdImages) {
-
-            // получаем массив id пользователей, которые лайкнули
-            api
-              .likesGetList(user_id, IdImg === "all" ? IdImages[el].id : el)
-              .then(
-                data => {
-                  let IdLikedPeople = "";
-
-                  data.items.forEach(el => {
-                    // в ответе объект, в котором массив id людей, которые лайкнули
-                    IdLikedPeople === "" //для ускорения, а может и не только, берём все id из массива
+            if ((Number(el)+1) % 1000 ===0) offsetLikesGetList+= 1000;
+            if (index % 25 !== 0 && IdImages.length - index !== 0) {
+            requestLikesGetList += `"${IdImages[el].id}": API.likes.getList({type: "photo", offset: ${offsetLikesGetList},
+             owner_id: ${user_id}, item_id: ${IdImg === "all" ? IdImages[el].id : el},count: 1000, v: 5.103}),`; 
+            }
+             else {
+              requestLikesGetList += `"${IdImages[el].id}": API.likes.getList({type: "photo",offset: ${offsetLikesGetList},
+               owner_id: ${user_id}, item_id: ${IdImg === "all" ? IdImages[el].id : el},count: 1000, v: 5.103}),`; 
+              requestLikesGetList = requestLikesGetList.slice(0, requestLikesGetList.length - 1);
+              //await sleep(200);
+               // получаем 25 массивов id пользователей, которые лайкнули
+               
+              await api.execute(requestLikesGetList).then(async(peopleWhoLiked) => {
+                let IdLikedPeople = '';
+                for (const idPhoto in peopleWhoLiked){
+                  for (const idPeople of peopleWhoLiked[idPhoto].items)
+                   {
+                    IdLikedPeople === '' 
                       ?
-                      (IdLikedPeople = IdLikedPeople + el) //и кидаем их в строку через запятую, а потом делаем запрос
+                      (IdLikedPeople += idPeople) 
                       :
-                      (IdLikedPeople = IdLikedPeople + "," + el); //в который кинем эту строку idшников и он мнесто них вернет массив имен и фамилий
-                  });
+                      (IdLikedPeople = IdLikedPeople + "," + idPeople); 
+                      await sleep(100)
 
+                      
+                  }
                   api.usersGet(IdLikedPeople).then(
                     //массив объектов, имена и фамилии получившийся из списка id пользователей
-
                     data => {
+                      debugger
+                     // debugger
                       dispatch(
                         likedPeople(
                           IdImg === "all" ? IdImages[el].id.toString() : el,
@@ -144,19 +163,23 @@ export const getLikes = (user_id, IdImg, previousSelectedFriend) => (dispatch) =
                         type: IMGES_BY_PEOPLE
                       });
                     },
-                    error => {
+                    error => {debugger
                       console.log(error.error);
                       alert("Произошла ошибка! Подробности в консоле.");
-                    }
-                  );
-                },
-                error => {
-                  console.log(error.error);
-                  alert("Произошла ошибка! Подробности в консоле.");
+                    })
+                    await sleep(350)
+                    IdLikedPeople='';
                 }
-              );
-            await sleep(1100);
-          }
+                
+                
+              }, error => {debugger
+                console.log(error.error);
+                alert("Произошла ошибка! Подробности в консоле.");
+              });
+              }
+              index++;
+            }
+          
         };
         await forWithSleep();
         dispatch({
@@ -216,7 +239,6 @@ export const loadWhomPutLike = (user_id, quantityLoad, store) => async (dispatch
                         //debugger
                       }
                   }, (error) => {
-                    console.log("friend", friend, "photos", photos, "countLikes", countLikes, "index", index)
                     debugger
                     console.log(`method name: ${api.execute.name} `, error.error);
                     //alert("Произошла ошибка! Подробности в консоле.");

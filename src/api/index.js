@@ -1,5 +1,5 @@
 const api_token =
-  "7b0cb4e7a555154329829579c4f2098c17641ade88bf6ce391f0c4236db9f05efddf0713a8bb64124a003";
+  "2707fb58eb0bdd90cf02ce41fc41da0fce2e7a0f7286a32629155224049c4ff1d63430025088fbf4855db";
 
 export const getFriends = (user_id, offset) =>
   new Promise((resolve, reject) =>
@@ -69,10 +69,10 @@ export const usersGet = IdLikedPeople =>
     window.VK.api(
       //массив объектов, имена и фамилии получившийся из списка id пользователей
       "users.get", {
-        user_ids: IdLikedPeople,
-        v: "5.103",
-        fields: "sex",
-        access_token: api_token
+        "user_ids": IdLikedPeople,
+        "v": "5.103",
+        "fields": "sex", 
+        "access_token": api_token
       },
       data =>
       data.error ? reject(data) : resolve(data.response)

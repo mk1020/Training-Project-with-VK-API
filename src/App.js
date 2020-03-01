@@ -80,8 +80,8 @@ const App = props => {
   const user_id = "43463557";
 
   useEffect(() => {
-    selectedFriend && loadWhomPutLike(selectedFriend, quantityLoad)
-    //selectedFriend && getPhotos(selectedFriend);
+   // selectedFriend && loadWhomPutLike(selectedFriend, quantityLoad)
+    selectedFriend && getPhotos(selectedFriend);
   }, [selectedFriend]);
 
      
