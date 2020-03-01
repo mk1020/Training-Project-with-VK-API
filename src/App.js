@@ -77,9 +77,11 @@ const App = props => {
   const [quantityLoad, changeQuantityLoad] = useState(0);
   const [onClickSecondTab, changeOnClickSecondTab] = useState(false);
   const [listPutLike, changeListPutLike] = useState([]);
+  const [onClickEnter, changeOnClickEnter] = useState(true);
   const user_id = "43463557";
 
   useEffect(() => {
+    
    // selectedFriend && loadWhomPutLike(selectedFriend, quantityLoad)
     selectedFriend && getPhotos(selectedFriend);
   }, [selectedFriend]);
@@ -99,6 +101,8 @@ const App = props => {
 
 
   useEffect(() => {
+    
+    
     const IdImgWithoutFalse = {};
     for (const key in selectedPhotos)
       if (selectedPhotos[key]) IdImgWithoutFalse[key] = selectedPhotos[key];
@@ -108,6 +112,11 @@ const App = props => {
       Object.keys(selectedPhotos).length !== 0
     ) {
       changeSelectedPhotos({})
+    }
+
+    if (inspectState.load_photos_end && Object.keys(selectedPhotos).length===0)
+     {changeOnClickEnter(false); 
+    
     }
   }, [selectedPhotos]);
 
@@ -201,7 +210,7 @@ const App = props => {
    } 
   }, [whomLikedReducerState.whomPutLikeEnd])
 
-
+console.log("onClick Enter", onClickEnter)
   return (
     <div className={styles.App_wrapper}>
       <header className={styles.App_header}>VK API</header>
@@ -275,7 +284,9 @@ const App = props => {
                 <div className={styles.filter}>Filter:</div>
                 <div
                   onClick={() => {
-                    if (inspectState.load_info_likes_end)
+                    if (inspectState.load_info_likes_end
+                       && Object.keys(selectedPhotos).length!==0 && 
+                       onClickEnter)
                       selectedFilter === "man-women"
                         ? changeSelectedFilter("man-women-change")
                         : changeSelectedFilter("man-women");
@@ -300,12 +311,13 @@ const App = props => {
                 </div>
                 <div className={styles.wrapper_img_man}>
                   <img
-                    onClick={() =>
-                      inspectState.load_info_likes_end &&
+                    onClick={() =>{
+                    if (inspectState.load_info_likes_end 
+                      && Object.keys(selectedPhotos).length!==0 && onClickEnter) 
                         selectedFilter === "man"
                         ? changeSelectedFilter("man-change")
                         : changeSelectedFilter("man")
-                    }
+                    }}
                     className={styles.img_man}
                     src={img_man}
                     alt="img-man"
@@ -322,12 +334,13 @@ const App = props => {
                 </div>
                 <div className={styles.wrapper_img_women}>
                   <img
-                    onClick={() =>
-                      inspectState.load_info_likes_end &&
+                    onClick={() =>{
+                     if ( inspectState.load_info_likes_end 
+                      && Object.keys(selectedPhotos).length!==0 && onClickEnter)
                         selectedFilter === "women"
                         ? changeSelectedFilter("women-change")
                         : changeSelectedFilter("women")
-                    }
+                    }}
                     className={styles.img_women}
                     src={img_women}
                     alt="img-women"
@@ -398,6 +411,7 @@ const App = props => {
                     onClick={() => {
                       if (selectAllPhotos === false && Object.keys(selectedPhotosWithoutFalse).length !== 0)
                         getLikes(selectedFriend, selectedPhotosWithoutFalse);
+                        changeOnClickEnter(true);
                     }}
                   >
                     Enter

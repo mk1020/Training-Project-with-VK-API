@@ -29,10 +29,10 @@ export const areaFriend = arrayFriends => ({
   arrayFriends: arrayFriends
 });
 
-export const likedPeople = (idPhoto, arrayLikedPeople) => ({
+export const likedPeople = (idPhotosIdPeople, likedPeopleInfo) => ({
   type: LIKED_PEOPLE,
-  arrayLikedPeople: arrayLikedPeople,
-  idPhoto: idPhoto
+  idPhotosIdPeople: idPhotosIdPeople,
+  likedPeopleInfo: likedPeopleInfo,
 });
 
 export const allPhotos = photos => ({
@@ -107,75 +107,85 @@ export const getLikes = (user_id, IdImg, previousSelectedFriend) => (dispatch) =
         await dispatch(allPhotos(dataPhotos));
         if (IdImg === "all") {
           IdImages = dataPhotos.items;
-        } else IdImages = IdImg;
+        } else {IdImages = IdImg;}
+        
         dispatch({
           type: LOAD_INFO_LIKES_START
         });
         const forWithSleep = async () => {
           let requestLikesGetList='';
           // массив id фоток [123,125, 543 и тд]
-
+       
           let index = 1;
           let offsetLikesGetList = 0;
+          //debugger
           for (const el in IdImages) {
+            
             if ((Number(el)+1) % 1000 ===0) offsetLikesGetList+= 1000;
-            if (index % 25 !== 0 && IdImages.length - index !== 0) {
-            requestLikesGetList += `"${IdImages[el].id}": API.likes.getList({type: "photo", offset: ${offsetLikesGetList},
+            if (index % 25 !== 0 && ((Array.isArray(IdImages) && IdImages.length - index !== 0) || 
+            (Array.isArray(IdImages)===false && Object.keys(IdImages).length - index !== 0))) 
+            {
+            requestLikesGetList += `"${IdImg === "all" ? IdImages[el].id : el}": API.likes.getList({type: "photo", offset: ${offsetLikesGetList},
              owner_id: ${user_id}, item_id: ${IdImg === "all" ? IdImages[el].id : el},count: 1000, v: 5.103}),`; 
             }
              else {
-              requestLikesGetList += `"${IdImages[el].id}": API.likes.getList({type: "photo",offset: ${offsetLikesGetList},
+              requestLikesGetList += `"${IdImg === "all" ? IdImages[el].id : el}": API.likes.getList({type: "photo",offset: ${offsetLikesGetList},
                owner_id: ${user_id}, item_id: ${IdImg === "all" ? IdImages[el].id : el},count: 1000, v: 5.103}),`; 
               requestLikesGetList = requestLikesGetList.slice(0, requestLikesGetList.length - 1);
               //await sleep(200);
                // получаем 25 массивов id пользователей, которые лайкнули
                
               await api.execute(requestLikesGetList).then(async(peopleWhoLiked) => {
-                let IdLikedPeople = '';
+                  let countUserIds=0;
+                  let IdLikedPeople = '';
+                  let arrayStringIdLikPe = [];
                 for (const idPhoto in peopleWhoLiked){
                   for (const idPeople of peopleWhoLiked[idPhoto].items)
-                   {
+                   { 
+                     countUserIds++;
                     IdLikedPeople === '' 
                       ?
                       (IdLikedPeople += idPeople) 
                       :
-                      (IdLikedPeople = IdLikedPeople + "," + idPeople); 
-                      await sleep(100)
-
-                      
+                      (IdLikedPeople = IdLikedPeople + "," + idPeople);   
+                      if (countUserIds===500) {
+                        arrayStringIdLikPe.push(IdLikedPeople);
+                        countUserIds=0;
+                        //IdLikedPeople='';
+                      }  
                   }
-                  api.usersGet(IdLikedPeople).then(
-                    //массив объектов, имена и фамилии получившийся из списка id пользователей
-                    data => {
-                      debugger
-                     // debugger
-                      dispatch(
-                        likedPeople(
-                          IdImg === "all" ? IdImages[el].id.toString() : el,
-                          data
-                        )
-                      );
-                      dispatch({
-                        type: LIKED_PEOPLE_UP,
-                        IdImg: IdImages
-                      });
-                      dispatch({
-                        type: IMGES_BY_PEOPLE
-                      });
-                    },
-                    error => {debugger
-                      console.log(error.error);
-                      alert("Произошла ошибка! Подробности в консоле.");
-                    })
-                    await sleep(350)
-                    IdLikedPeople='';
                 }
-                
+                arrayStringIdLikPe.push(IdLikedPeople);
+                //возможно проблема в раличиии отсортированности ответа от ехекьют и юзерс гет
+                // диспатчить не peopleWhoLiked, а ту самую строку с 500 id шников, которую кидаю в юзерс гет
+                console.log(IdLikedPeople)
+
+                 for(const request of arrayStringIdLikPe) {
+              await api.usersGet(request).then(
+                  //массив объектов, имена и фамилии получившийся из списка id пользователей
+                  data => {
+                    dispatch(
+                      likedPeople(peopleWhoLiked, data)
+                    );
+                    dispatch({
+                      type: LIKED_PEOPLE_UP,
+                      IdImg: IdImages
+                    });
+                    dispatch({
+                      type: IMGES_BY_PEOPLE
+                    });
+                  },
+                  error => {debugger
+                    console.log(error.error);
+                    alert("Произошла ошибка! Подробности в консоле.");
+                  }); debugger}
                 
               }, error => {debugger
                 console.log(error.error);
                 alert("Произошла ошибка! Подробности в консоле.");
               });
+              await sleep(350)
+              requestLikesGetList='';
               }
               index++;
             }
@@ -186,7 +196,7 @@ export const getLikes = (user_id, IdImg, previousSelectedFriend) => (dispatch) =
           type: LOAD_INFO_LIKES_END
         });
       },
-      error => {
+      error => {debugger
         console.log(error.error);
         alert("Произошла ошибка! Подробности в консоле.");
       }

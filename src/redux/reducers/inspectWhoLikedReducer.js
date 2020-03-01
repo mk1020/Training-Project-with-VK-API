@@ -1,8 +1,11 @@
+/* eslint-disable no-loop-func */
 import * as types from "../actions/actions";
+import { act } from "react-dom/test-utils";
 
 export const inspectWhoLikedReducer = (state = {}, action) => {
   switch (action.type) {
     case types.LIKED_PEOPLE_UP: {
+      
       let likedPeopleCopy = {};
       let IdImgCopy = {};
       Array.isArray(action.IdImg) ?
@@ -22,7 +25,27 @@ export const inspectWhoLikedReducer = (state = {}, action) => {
     }
     case types.LIKED_PEOPLE: {
       let obj = {};
-      obj[action.idPhoto] = action.arrayLikedPeople; //объект: id: [массив obj]
+      let arrayLikedPeople=[];
+    //  obj[action.idPhoto] = action.arrayLikedPeople; //объект: id: [массив obj]
+     let countIdResponseExecute = 0;
+      for (const idPhoto in action.idPhotosIdPeople) { //в item массив id тех, кто лайкнул
+        for (const idPeopleWhoLiked of  action.idPhotosIdPeople[idPhoto].items)
+       { 
+        // debugger
+        countIdResponseExecute++;
+        if (countIdResponseExecute<=500)  {
+         const people = action.likedPeopleInfo.find((peopleInfo)=> idPeopleWhoLiked == peopleInfo.id);
+         if(!people) debugger
+         arrayLikedPeople.push({id: idPeopleWhoLiked, first_name: people.first_name,
+                last_name: people.last_name, sex: people.sex})
+         }
+       }
+       obj[idPhoto] = arrayLikedPeople;
+       arrayLikedPeople=[];
+
+      }
+      
+     
       return {
         ...state,
         likedPeople: {
