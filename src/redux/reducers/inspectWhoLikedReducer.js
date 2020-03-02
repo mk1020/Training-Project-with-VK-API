@@ -1,6 +1,6 @@
 /* eslint-disable no-loop-func */
 import * as types from "../actions/actions";
-import { act } from "react-dom/test-utils";
+import { mergeWith } from "lodash";
 
 export const inspectWhoLikedReducer = (state = {}, action) => {
   switch (action.type) {
@@ -25,33 +25,40 @@ export const inspectWhoLikedReducer = (state = {}, action) => {
     }
     case types.LIKED_PEOPLE: {
       let obj = {};
-      let arrayLikedPeople=[];
-    //  obj[action.idPhoto] = action.arrayLikedPeople; //объект: id: [массив obj]
-     let countIdResponseExecute = 0;
-      for (const idPhoto in action.idPhotosIdPeople) { //в item массив id тех, кто лайкнул
-        for (const idPeopleWhoLiked of  action.idPhotosIdPeople[idPhoto].items)
-       { 
-        // debugger
-        countIdResponseExecute++;
-        if (countIdResponseExecute<=500)  {
-         const people = action.likedPeopleInfo.find((peopleInfo)=> idPeopleWhoLiked == peopleInfo.id);
-         if(!people) debugger
-         arrayLikedPeople.push({id: idPeopleWhoLiked, first_name: people.first_name,
-                last_name: people.last_name, sex: people.sex})
-         }
-       }
-       obj[idPhoto] = arrayLikedPeople;
-       arrayLikedPeople=[];
+      let count = 0;
 
-      }
+      function customizer(objValue, srcValue) {
+          if (Array.isArray(objValue)) {
+            return objValue.concat(srcValue);
+          }
+        }
+
+    //  obj[action.idPhoto] = action.arrayLikedPeople; //объект: id: [массив obj]
+      let arrayLikedPeople1;
+         arrayLikedPeople1=[];
+         let idPhoto; 
+         for (const key in action.peopleWhoLiked){
+           
+          action.peopleWhoLiked[key].items.forEach((idPeople2)=> {
+            action.arrayIdLikedPeople.forEach((idPeople)=> {
+              const people = action.likedPeopleInfo.find((peopleInfo)=> idPeople == peopleInfo.id);
+              if (idPeople2==idPeople) idPhoto = key;
+              if (people)
+              arrayLikedPeople1.push({id: idPeople, first_name: people.first_name,
+                last_name: people.last_name, sex: people.sex})
+          })         
+         })
+
+            if (obj[idPhoto]) {
+          obj[idPhoto] = [...obj[idPhoto], ...arrayLikedPeople1];}
+          else { obj[idPhoto] = arrayLikedPeople1}
+        } 
       
-     
+      
+debugger
       return {
         ...state,
-        likedPeople: {
-          ...state.likedPeople,
-          ...obj
-        }
+        likedPeople: mergeWith(state.likedPeople, obj, customizer)
       };
     }
     case types.IMGES_BY_PEOPLE: {

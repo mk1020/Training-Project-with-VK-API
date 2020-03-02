@@ -29,10 +29,11 @@ export const areaFriend = arrayFriends => ({
   arrayFriends: arrayFriends
 });
 
-export const likedPeople = (idPhotosIdPeople, likedPeopleInfo) => ({
+export const likedPeople = (arrayIdLikedPeople, likedPeopleInfo, peopleWhoLiked) => ({
   type: LIKED_PEOPLE,
-  idPhotosIdPeople: idPhotosIdPeople,
+  arrayIdLikedPeople: arrayIdLikedPeople,
   likedPeopleInfo: likedPeopleInfo,
+  peopleWhoLiked: peopleWhoLiked
 });
 
 export const allPhotos = photos => ({
@@ -98,11 +99,16 @@ export const getPhotos = user_id => dispatch => {
   });
 };
 
-export const getLikes = (user_id, IdImg, previousSelectedFriend) => (dispatch) => {
+export const getLikes = (user_id, IdImg, previousSelectedFriend) => async (dispatch) => {
   //получаем id фоток
-  api.photosGetAll(user_id).then(
+     let offsetPhotosGetAll=0;
+     let countPhotos;
+     let allPeopleIdPhotoIdPeop={};
+     let allPeopleNoRepeatInfo = [];
+     do {
+await api.photosGetAll(user_id, offsetPhotosGetAll).then(
     async dataPhotos => {
-
+      countPhotos = dataPhotos.count;
         let IdImages = null;
         await dispatch(allPhotos(dataPhotos));
         if (IdImg === "all") {
@@ -115,75 +121,97 @@ export const getLikes = (user_id, IdImg, previousSelectedFriend) => (dispatch) =
         const forWithSleep = async () => {
           let requestLikesGetList='';
           // массив id фоток [123,125, 543 и тд]
-       
+         
           let index = 1;
-          let offsetLikesGetList = 0;
-          //debugger
           for (const el in IdImages) {
-            
-            if ((Number(el)+1) % 1000 ===0) offsetLikesGetList+= 1000;
             if (index % 25 !== 0 && ((Array.isArray(IdImages) && IdImages.length - index !== 0) || 
             (Array.isArray(IdImages)===false && Object.keys(IdImages).length - index !== 0))) 
             {
-            requestLikesGetList += `"${IdImg === "all" ? IdImages[el].id : el}": API.likes.getList({type: "photo", offset: ${offsetLikesGetList},
+            requestLikesGetList += `"${IdImg === "all" ? IdImages[el].id : el}": API.likes.getList({type: "photo", offset: 0,
              owner_id: ${user_id}, item_id: ${IdImg === "all" ? IdImages[el].id : el},count: 1000, v: 5.103}),`; 
             }
              else {
-              requestLikesGetList += `"${IdImg === "all" ? IdImages[el].id : el}": API.likes.getList({type: "photo",offset: ${offsetLikesGetList},
+              requestLikesGetList += `"${IdImg === "all" ? IdImages[el].id : el}": API.likes.getList({type: "photo",offset: 0,
                owner_id: ${user_id}, item_id: ${IdImg === "all" ? IdImages[el].id : el},count: 1000, v: 5.103}),`; 
               requestLikesGetList = requestLikesGetList.slice(0, requestLikesGetList.length - 1);
               //await sleep(200);
                // получаем 25 массивов id пользователей, которые лайкнули
-               
-              await api.execute(requestLikesGetList).then(async(peopleWhoLiked) => {
+                let arrayRequestLikesGetList=[];
+                arrayRequestLikesGetList.push(requestLikesGetList);
+
+                let offsetLikesGetList=0;
+              for (const request of arrayRequestLikesGetList){
+              await api.execute(request).then(async(peopleWhoLiked) => {
+
+                offsetLikesGetList+=1000;
+                requestLikesGetList = '';
+                 for (const idPhoto in peopleWhoLiked){
+                   if (peopleWhoLiked[idPhoto].count>offsetLikesGetList) {
+                     requestLikesGetList+=`"${idPhoto}":
+                       API.likes.getList({type: "photo",offset: ${offsetLikesGetList}, 
+                       owner_id: ${user_id}, item_id: ${idPhoto},
+                       count: 1000, v: 5.103}),`
+                  }
+                }
+                if (requestLikesGetList!=='') { 
+                  requestLikesGetList = requestLikesGetList.slice(0, requestLikesGetList.length - 1);
+                  arrayRequestLikesGetList.push(requestLikesGetList);
+                }
+                
                   let countUserIds=0;
                   let IdLikedPeople = '';
                   let arrayStringIdLikPe = [];
+                  let arrayIdLikedPeople = [];
                 for (const idPhoto in peopleWhoLiked){
                   for (const idPeople of peopleWhoLiked[idPhoto].items)
                    { 
                      countUserIds++;
-                    IdLikedPeople === '' 
-                      ?
-                      (IdLikedPeople += idPeople) 
-                      :
-                      (IdLikedPeople = IdLikedPeople + "," + idPeople);   
-                      if (countUserIds===500) {
+                   if(IdLikedPeople === '') 
+                      {IdLikedPeople += idPeople; arrayIdLikedPeople.push(idPeople)} 
+                      else {
+                      IdLikedPeople = IdLikedPeople + "," + idPeople; 
+                           arrayIdLikedPeople.push(idPeople)}   
+
+                      if (countUserIds===1000) {
                         arrayStringIdLikPe.push(IdLikedPeople);
                         countUserIds=0;
-                        //IdLikedPeople='';
+                        IdLikedPeople='';
+                        arrayIdLikedPeople=[];
                       }  
                   }
                 }
-                arrayStringIdLikPe.push(IdLikedPeople);
+                if (countUserIds!==0) arrayStringIdLikPe.push(IdLikedPeople);
                 //возможно проблема в раличиии отсортированности ответа от ехекьют и юзерс гет
                 // диспатчить не peopleWhoLiked, а ту самую строку с 500 id шников, которую кидаю в юзерс гет
-                console.log(IdLikedPeople)
 
-                 for(const request of arrayStringIdLikPe) {
+                 for(const request of arrayStringIdLikPe) {       
+                        
               await api.usersGet(request).then(
                   //массив объектов, имена и фамилии получившийся из списка id пользователей
                   data => {
+                    
+                    allPeopleNoRepeatInfo.push(...data);
+                   
                     dispatch(
-                      likedPeople(peopleWhoLiked, data)
+                      likedPeople(arrayIdLikedPeople, data,peopleWhoLiked)
                     );
-                    dispatch({
+                    /*  dispatch({
                       type: LIKED_PEOPLE_UP,
                       IdImg: IdImages
                     });
                     dispatch({
                       type: IMGES_BY_PEOPLE
-                    });
+                    });  */
                   },
                   error => {debugger
                     console.log(error.error);
                     alert("Произошла ошибка! Подробности в консоле.");
-                  }); debugger}
+                  }); }
                 
               }, error => {debugger
                 console.log(error.error);
                 alert("Произошла ошибка! Подробности в консоле.");
-              });
+              });}
               await sleep(350)
               requestLikesGetList='';
               }
@@ -192,15 +220,21 @@ export const getLikes = (user_id, IdImg, previousSelectedFriend) => (dispatch) =
           
         };
         await forWithSleep();
-        dispatch({
-          type: LOAD_INFO_LIKES_END
-        });
+        
       },
       error => {debugger
         console.log(error.error);
         alert("Произошла ошибка! Подробности в консоле.");
       }
   );
+  offsetPhotosGetAll += 200;
+//debugger
+} while (offsetPhotosGetAll < countPhotos)
+
+
+dispatch({
+  type: LOAD_INFO_LIKES_END
+});
 };
 
 export const loadWhomPutLike = (user_id, quantityLoad, store) => async (dispatch, getState) => {
@@ -235,6 +269,8 @@ export const loadWhomPutLike = (user_id, quantityLoad, store) => async (dispatch
                   requestsIsLiked += `photo${index}: API.likes.isLiked({user_id: ${user_id},
                  type: "photo", owner_id: ${friend.id}, item_id: ${photo.id},  v: 5.103}),`;
                 else {
+                  requestsIsLiked += `photo${index}: API.likes.isLiked({user_id: ${user_id},
+                    type: "photo", owner_id: ${friend.id}, item_id: ${photo.id},  v: 5.103}),`;
                   requestsIsLiked = requestsIsLiked.slice(0, requestsIsLiked.length - 1);
                   await sleep(200);
                   await api.execute(requestsIsLiked).then((photosIsLiked) => {

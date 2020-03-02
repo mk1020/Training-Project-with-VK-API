@@ -210,6 +210,14 @@ const App = props => {
    } 
   }, [whomLikedReducerState.whomPutLikeEnd])
 
+useEffect(()=> {
+ let count=0;
+ likedPeople && Object.keys(likedPeople).forEach((idPhoto)=> {
+  likedPeople[idPhoto].forEach((people)=> count++)}) 
+  likedPeople && console.log("count lp ", count)
+   
+}, [likedPeople])
+
 console.log("onClick Enter", onClickEnter)
   return (
     <div className={styles.App_wrapper}>
